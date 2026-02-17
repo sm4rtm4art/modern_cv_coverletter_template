@@ -343,6 +343,7 @@ applications/*/*
 !applications/_template_en/
 !applications/_template_en/**
 
+
 # Re-ignore build artifacts inside templates
 applications/**/*.aux
 applications/**/*.fdb_latexmk
