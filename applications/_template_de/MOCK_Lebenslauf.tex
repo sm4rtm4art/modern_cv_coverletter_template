@@ -1,0 +1,356 @@
+% !TeX program = xelatex
+% !TeX TXS-program:compile = txs:///xelatex
+%
+
+%===============================================================================
+% CV – Template (German)
+% Content only. Layout/fonts handled by common/cls/cv/*.cls.
+%===============================================================================
+
+% documentclass[debug(optional), singlsided/doublesided (2 Page highlightbar left vs. 2 Page highlightbar right ), papersize, global font size]{path to main_cv.cls}
+\documentclass[debug,
+singlesided,
+paper=a4,
+fontsize=10pt]{../../common/cls/cv/main_cv}
+
+\usepackage[ngerman]{babel}
+
+%--- options : de/en
+\cvSetLanguage{de}
+
+\usepackage{lipsum}
+
+% Skill bar renderer: classic | segmented
+\cvUseSkillBarStyle{segmented}
+
+
+% Hide link borders/colors globally (clean CV look).
+% Header links are colored white inside \makeheader via scoped \hypersetup.
+\AtBeginDocument{\hypersetup{hidelinks}}
+
+%===============================================================================
+% GEOMETRY
+%===============================================================================
+
+\setlength\highlightwidth{8cm}
+\setlength\headerheight{4cm}
+\setlength\marginleft{1cm}
+\setlength\marginright{\marginleft}
+\setlength\margintop{1cm}
+\setlength\marginbottom{1cm}
+
+%===============================================================================
+% COLORS
+%===============================================================================
+
+% Override shared color defaults (see shared_adjustment.cls for full palette).
+%\colorlet{headerbarcolor}{black}
+%\definecolor{highlightbarcolor}{HTML}{EAEDED}
+\colorlet{headerfontcolor}{white}
+\definecolor{highlight}{HTML}{0055FF}
+%\colorlet{accent}{highlight}
+%\colorlet{heading}{black}
+%\colorlet{body}{black}
+
+%===============================================================================
+% FOOTER
+%===============================================================================
+
+% \makecvfooter{date}{label-page1}{label-page2}{name}
+%   Single page: L=date, C=label1, R=name
+%   Two pages:   L=date, C=label1/label2, R=Seite n von 2
+% \makecvfooter{date}{label-page1}{label-page2}{name}
+%   name = {} defaults to \prefix + \name (auto-detected)
+\makecvfooter
+  {\today}
+  {Tabellarischer Lebenslauf}
+  {Detaillierte Arbeitserfahrung}
+  {}
+
+
+% --- Personal data ---
+\prefix{Dr.}
+\name{Max Mustermann}
+% --- Contact block ---
+% Keep contact rows inside \tagline for a single, reusable header API.
+\tagline{
+	% Address format: {street and number}{zip code}{city}
+	\address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}
+	\phone{+49}{0150 12345678}
+	\email{max\_mustermann@email.de}
+	\github{sm4rtm4art}{https://github.com/sm4rtm4art}
+	\linkedin{Max Mustermann}{https://www.linkedin.com/company/overleaf/?originalSubdomain=uk}
+}
+
+%% Photo options => square | roundedbottom
+\photo[roundedbottom]{../../images/image}{\dimexpr\headerheight-\marginbottom}
+
+
+%===============================================================================
+% DOCUMENT
+%===============================================================================
+
+\begin{document}
+
+	\makeheader%
+
+
+%===============================================================================
+% PAGE 1 — HIGHLIGHT SIDEBAR
+%===============================================================================
+
+
+	\highlightbar{%
+
+		\sidebarSection{Kenntnisse}
+
+		% \cvSideSectionFormat: [Icon]{Content}
+		\cvSideSection[\faTerminal]{Programmiersprachen}
+		% icons can be found at https://ctan.org/pkg/fontawesome5
+		% \cvSkill{skill}{score}
+		\cvSkill{\LaTeX}{5}
+		\cvSkill{Sprache 1}{4}
+		\cvSkill{Sprache 2}{3}
+		\cvSkill{Programmiersprache 3}{2}
+		\cvSkill{Programmiersprache 4}{1}
+
+		\vspace{0.5cm} %optional
+
+		\cvSideSection[\faChartLine]{Domain 1 }
+		%\cvSideSection{Domain 1}
+
+		% \cvSkill{Base}{Detail}
+		\cvSkillDetail{Beispiel Skill Section}{5}{Beispiel1· Beispiel2 · Beispiel3}
+		\cvSkillDetail{Beispiel Skill Section}{4}{Beispiel1· Beispiel2 · Beispiel3}
+		\cvSkillDetail{Beispiel Skill Section}{3}{Beispiel1· Beispiel2 · Beispiel3}
+		\cvSkillDetail{Beispiel Skill Section}{2}{Beispiel1· Beispiel2 · Beispiel3}
+
+		\vspace{0.5cm} %optional
+
+		\cvSideSection[\faDatabase]{Domain 2}
+		%\cvSideSection{Domain 2}
+		\cvSkillDetail{Beispiel Skill Section}{5}{Beispiel1· Beispiel2 · Beispiel3}
+		\cvSkillDetail{Beispiel Skill Section}{4}{Beispiel1· Beispiel2 · Beispiel3}
+		\cvSkillDetail{Beispiel Skill Section}{3}{Beispiel1· Beispiel2 · Beispiel3}
+		\cvSkillDetail{Beispiel Skill Section}{2}{Beispiel1· Beispiel2 · Beispiel3}
+
+		\vspace{0.5cm} %optional
+
+		\cvSideSection[\faGlobe]{Sprachen}
+		%\cvSideSection{Sprachen}
+		\cvSkill{Deutsch / Englisch}{5}
+		\cvSkill{Französisch}{3}
+
+		\vspace{0.5cm} %optional
+
+		\sidebarSection{Zertifikate}
+		% \cert{Certificate}{Detail}
+		\cert{Zertifikat 1}{Zertifikatdetail}
+		\cert{Zertifikat 2}{Zertifikatdetail}
+		\cert{Zertifikat 3}{Zertifikatdetail}
+		\cert{Zertifikat 4}{Zertifikatdetail}
+		\cert{Zertifikat 5}{Zertifikatdetail}
+		\cert{Zertifikat 6}{Zertifikatdetail}
+
+
+	}%
+
+
+	%===============================================================================
+	% PAGE 1 — MAIN CONTENT
+	%===============================================================================
+
+	\mainbar{
+
+		\section[\faUser]{Über mich}
+		%\section{Über mich}
+
+		 \lipsum[1][1-8]
+
+		\vspace{1.0em}
+
+		\section[\faBriefcase]{Arbeitserfahrung}
+		%\section{Arbeitserfahrung}
+
+		% Unified Format: {Company}{Position}{Date}{Location}{Highlighttext}
+		\cvJobOverview{Firma}
+		{Position 1 | Position 2}
+		{12|25 \textendash Aktuell} % ATS- Info => 12/2025 - \today{mm/yyyy}
+		{Ort 1}
+		% No highlight — optional [highlight] argument omitted
+
+		\cvJobOverview{Firma 2}
+		{Position 1 }
+		{01|25 \textendash 11|25}  % ATS- Info => 01/2025 - 11/2025
+		{Ort 2}
+		[{\textbf{Optional:} Highlight Text, der die Arbeitsbeschreibung definiert.}]
+
+		\cvJobOverview{Firma 3}
+		{Position 1 }
+		{02|23 \textendash 12|24}
+		{Ort 3}
+		[{\lipsum[1][1-3]}]
+
+		\vspace{1cm} % Optional
+
+		\section[\faGraduationCap]{Ausbildung}
+		%\section{Ausbildung}
+
+		% Unified Format: {Institution}{Degree}{Date}{Location}{Details}
+
+		\cvEduOverview{Ausbildungsstätte 1}
+		{Abschluss}
+		{01|2022 \textendash 02|2023}  % ATS- Info => 10/2022 - 02/2023
+		{Ort}
+		% No highlight — optional [highlight] argument omitted
+
+		\cvEduOverview{Ausbildungsstätte 2}
+		{Abschluss}
+		{01|2020 \textendash 12|2021}
+		{Ort}
+		[{\textbf{Optional:} Note, Abschluss, Details}]
+
+		\cvEduOverview{Ausbildungsstätte 3}
+		{Abschluss}
+		{01|2017 \textendash 12|2019}
+		{ Längerer Ortsname }
+		[{\textbf{Optional:} Note, Abschluss, Details}]
+
+	}%
+
+	\makebody%
+	\clearpage   % Important for creating the new page
+
+	%===============================================================================
+	% PAGE 2
+	%===============================================================================
+
+	\pagestyle{highlightmain} % Sets style
+
+	%===============================================================================
+	% PAGE 2 — HIGHLIGHT SIDEBAR
+	%===============================================================================
+
+
+	\highlightbar{%
+		\sidebarSection{Methodenprofil}
+
+
+		\cvSideSection{Methodik 1}
+		\begin{cvTagCloud}
+			\cvSkillTags{
+				Skill 1,
+			Skill 2,
+			Skill 3,
+			Skill 4,
+			Skill mit längerer Zeichenlänge
+			}
+		\end{cvTagCloud}
+
+		\vspace{0.2cm}
+
+		\cvSideSection{Methodik 2}
+			\begin{cvTagCloud}
+				\cvSkillTags{
+					Skill 1,
+					Skill 2,
+					Skill 3,
+					Skill 4,
+					Skill mit längerer Zeichenlänge
+				}
+			\end{cvTagCloud}
+
+		\vspace{0.2cm}
+
+		\cvSideSection{Methodik 3}
+			\begin{cvTagCloud}
+				\cvSkillTags{
+					Skill 1,
+					Skill 2,
+					Skill 3,
+					Skill 4,
+					Skill mit längerer Zeichenlänge
+				}
+			\end{cvTagCloud}
+	}%
+
+
+
+  	%===============================================================================
+  	% PAGE 2 — MAIN CONTENT
+  	%===============================================================================
+
+	\mainbar{
+
+		%\section{Arbeitserfahrung im Detail}
+		\section[\faBriefcase]{Arbeitserfahrung im Detail}
+
+		%---- \cvJobDetails
+
+		% 1. Company 1 –{Company}{Position}{Date}{Location}{Job description}{Tags}
+		\cvJobDetail%
+		{Firma 1}
+		{Position 1.1 | Position 1.2 }
+		{12|2025\textendash Aktuell}
+		{Ort1}
+		{
+		% ---  optional  {Core} / short description ---
+		\cvDetailItem{Optional:} {Details aus der Arbeitserfahrung die man hier beschreiben kann}
+		\cvDetailItem{Optional:} {\lipsum[1][1-3]}
+		\cvDetailItem{Optional:} {\lipsum[1][1-4]}
+		}
+		% No tags — optional [tags] argument omitted
+
+		% 2. Company 2 –{Company}{Position}{Date}{Location}{Job description}{Tags}
+
+		\cvJobDetail%
+		{Firma 2}
+		{Position 2 }
+		{01|2025 \textendash 11|2026}
+		{Ort 2}
+		{
+			% ---  optional  {Core} / short description --
+			\cvDetailItem{Optional:} {Details aus der Arbeitserfahrung die man hier beschreiben kann}
+			\cvDetailItem{Optional:} {Details aus der Arbeitserfahrung die man hier beschreiben kann}
+		}
+		[{% --- Tags (pick a shorter set if needed) ---
+			\cvJobTags{
+				Tag 1,
+				Tag 2,
+				Tag 3,
+				Tag 4  as pill form,
+				Tag 5  as pill form,
+				Tag 6  as pill form
+				}
+		}]
+
+		% 3. Company 3 –{Company}{Position}{Date}{Location}{Job description}{Tags}
+		\cvJobDetail%
+		{Firma 3}
+		{Position 3}
+		{02|2023\textendash12|2024}
+		{Ort 3}
+		{
+		% ---  optional  {Core} / short description ---
+		\cvDetailItem{Optional:} {Details aus der Arbeitserfahrung die man hier beschreiben kann}
+		\cvDetailItem{Optional:} {Details aus der Arbeitserfahrung die man hier beschreiben kann}
+		}
+		[{% --- Tags (pick a shorter set if needed)
+			\cvJobTags{
+			Tag 1,
+			Tag 2,
+			Tag 3,
+			Tag 4  as pill form,
+			Tag 5  as pill form,
+			Tag 6  as pill form
+			}
+		}]
+
+
+}%
+
+
+
+\makebody%
+
+\end{document}

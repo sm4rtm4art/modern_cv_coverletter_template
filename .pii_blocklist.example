@@ -1,0 +1,19 @@
+# PII Blocklist — Personal strings that must NEVER be committed.
+# Copy this file to .pii_blocklist and replace with YOUR real data.
+# The .pii_blocklist file is gitignored and stays local.
+#
+# One string per line. Empty lines and lines starting with # are ignored.
+# The PII guard checks if any of these strings appear in tracked .tex/.cls files.
+
+# Your real name (all variations)
+Max
+Mustermann
+Dr. Max Mustermann
+
+# Your real contact info
++49 150 00000000
+real.email@provider.com
+
+# Your real address
+Musterweg 1
+D-00000

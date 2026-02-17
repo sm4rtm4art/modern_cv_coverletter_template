@@ -1,0 +1,185 @@
+name: CI — LaTeX Compile & Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Write permission so CI can push preview images and clean up artifacts.
+permissions:
+  contents: write
+
+jobs:
+  compile:
+    name: Compile LaTeX documents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- German templates ---
+      - name: Compile German CV (MOCK_Lebenslauf)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_de
+          root_file: MOCK_Lebenslauf.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Compile German CV (second pass for cross-refs)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_de
+          root_file: MOCK_Lebenslauf.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Compile German Cover Letter (MOCK_Bewerbungsanschreiben)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_de
+          root_file: MOCK_Bewerbungsanschreiben.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Compile German Cover Letter (second pass)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_de
+          root_file: MOCK_Bewerbungsanschreiben.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      # --- English templates ---
+      - name: Compile English CV (MOCK_curriculum_vitae)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_en
+          root_file: MOCK_curriculum_vitae.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Compile English CV (second pass)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_en
+          root_file: MOCK_curriculum_vitae.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Compile English Cover Letter (MOCK_cover_letter)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_en
+          root_file: MOCK_cover_letter.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      - name: Compile English Cover Letter (second pass)
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: applications/_template_en
+          root_file: MOCK_cover_letter.tex
+          compiler: xelatex
+          args: -interaction=nonstopmode -halt-on-error
+
+      # --- Convert first page of each PDF to PNG for README ---
+      - name: Convert PDFs to preview images
+        run: |
+          sudo apt-get update && sudo apt-get install -y poppler-utils
+          mkdir -p docs/previews
+          pdftoppm -png -r 200 -f 1 -l 1 \
+            "applications/_template_de/MOCK_Lebenslauf.pdf" \
+            docs/previews/cv_de
+          pdftoppm -png -r 200 -f 1 -l 1 \
+            "applications/_template_de/MOCK_Bewerbungsanschreiben.pdf" \
+            docs/previews/cover_letter_de
+          pdftoppm -png -r 200 -f 1 -l 1 \
+            "applications/_template_en/MOCK_curriculum_vitae.pdf" \
+            docs/previews/cv_en
+          pdftoppm -png -r 200 -f 1 -l 1 \
+            "applications/_template_en/MOCK_cover_letter.pdf" \
+            docs/previews/cover_letter_en
+
+      # --- Remove tracked build artifacts and commit changes (main only) ---
+      - name: Clean artifacts and commit previews
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Remove any tracked build artifacts that .gitignore should exclude
+          git ls-files -- '*.aux' '*.log' '*.fls' '*.fdb_latexmk' '*.xdv' \
+            '*.synctex.gz' '*.out' '*.toc' '*.bbl' '*.blg' '*.bcf' \
+            '*.run.xml' '*.txt' 'texput.*' \
+            | xargs -r git rm --cached --ignore-unmatch
+
+          # Stage preview images
+          git add docs/previews/*.png
+
+          # Commit only if there are staged changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: update preview images and clean build artifacts"
+            git push
+          fi
+
+      - name: Upload compiled PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-pdfs
+          path: |
+            applications/_template_de/MOCK_Lebenslauf.pdf
+            applications/_template_de/MOCK_Bewerbungsanschreiben.pdf
+            applications/_template_en/MOCK_curriculum_vitae.pdf
+            applications/_template_en/MOCK_cover_letter.pdf
+
+  lint:
+    name: Lint & PII check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install chktex
+        run: sudo apt-get update && sudo apt-get install -y chktex
+
+      - name: Run chktex on .tex files
+        run: |
+          exit_code=0
+          for f in applications/_template_de/*.tex applications/_template_en/*.tex; do
+            echo "=== chktex: $f ==="
+            chktex -q -n 1 -n 8 -n 24 -n 36 -n 44 "$f" || exit_code=$?
+          done
+          echo "chktex completed (exit: $exit_code)"
+
+      - name: Run PII guard
+        run: |
+          bash scripts/pii_guard.sh \
+            applications/_template_de/MOCK_Lebenslauf.tex \
+            applications/_template_de/MOCK_Bewerbungsanschreiben.tex \
+            applications/_template_en/MOCK_curriculum_vitae.tex \
+            applications/_template_en/MOCK_cover_letter.tex
+
+      - name: Lint shell scripts
+        run: |
+          shellcheck -x scripts/*.sh
+
+  # ---------------------------------------------------------------------------
+  # Overleaf Sync (optional — uncomment and configure to enable)
+  # ---------------------------------------------------------------------------
+  # overleaf:
+  #   name: Sync to Overleaf
+  #   runs-on: ubuntu-latest
+  #   needs: [compile, lint]
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #
+  #     - name: Push to Overleaf
+  #       run: |
+  #         git remote add overleaf \
+  #           https://git:${{ secrets.OVERLEAF_GIT_TOKEN }}@git.overleaf.com/${{ secrets.OVERLEAF_PROJECT_ID }}
+  #         git push overleaf main --force

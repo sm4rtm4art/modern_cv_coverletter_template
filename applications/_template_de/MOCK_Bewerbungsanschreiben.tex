@@ -1,0 +1,110 @@
+% !TeX program = xelatex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%																																  %
+%      Motivationsschreiben Templat																	 	  %
+%																																  %
+%																																  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[debug,12pt,a4paper]{../../common/cls/cover_letter/main_cover_letter}
+\geometry{left=1.5cm, top=1cm, right=1.5cm, bottom=1.0cm, footskip=.5cm}
+
+\usepackage[ngerman]{babel}
+\usepackage[final]{microtype}
+\usepackage{lipsum}
+
+
+
+%\definecolor{mediumgray}{HTML}{D1D1D6} 
+% \definecolor{highlight}{HTML}{0071E3}  
+\definecolor{letterText}{HTML}{1D1D1F}    
+\definecolor{letterSub}{HTML}{86868B}
+
+
+\definecolor{letterText}{HTML}{1c1c1e}
+\definecolor{letterSub}{HTML}{6E6E73}
+\definecolor{letterRule}{HTML}{0055FF}
+\definecolor{highlight}{HTML}{265ca2}
+
+\colorlet{text}{letterText}
+\colorlet{gray}{letterSub}
+\colorlet{sectiondivider}{letterRule}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{8pt}
+
+% Letter body line spacing (applied automatically inside cover_letter env)
+\setLetterBodySpread{1.2}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%=
+% EDIT HERE (Target + Personal info)
+% %%%%%%%%%%%%%%%%%%%%%%%%=
+
+% --- Target / recipient ---
+\newcommand{\TargetCompany}{ACME Inc.}
+\newcommand{\TargetRoleWithId}{Ausschreibung mit interessanter Beschreibung (Nr. 12345)}
+
+\recipientCompany[highlight]{\TargetCompany}
+\recipientName{Personalabteilung (z.\ Hd. Jane Doe)}
+\recipientStreet{Zielstraße 321}
+\recipientCity{D-54321 Berlin}
+
+% --- Personal tokens ---
+\namePrefix{Dr.}
+\name{Max Mustermann}
+\position{Position 1 · Position 2 · Position 3}
+\address{Hauptstraße 101, D-12345 Berlin}
+\phone{+49 (0)150 12345678}
+\email{Mustermann@e-mail.de}
+\github{sm4rtm4art}
+\linkedin{\fullname}{https://www.linkedin.com/in/example}
+
+% --- Letter metadata ---
+\letterDate{\today}
+\letterTitle[text]{Bewerbung:}{\TargetRoleWithId}
+\letterOpening{Sehr geehrte Damen und Herren,}
+\letterclosing{Mit freundlichen Grüßen,}
+% \letterenclosure[Attached]{Curriculum Vitae}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%=
+\begin{document}
+
+	\makeLetterHeader[L]
+
+	\makeLetterFooter
+	{\today}
+	{Bewerbungsschreiben}
+	{}
+
+	\makeletterTitle
+
+%-------------------------------------------------------------------------------
+%  LETTER CONTENT
+%-------------------------------------------------------------------------------
+\begin{cover_letter}
+
+
+% TODO: Write a tailored cover letter for \TargetCompany / \TargetRole.
+% Suggested structure:
+% - Motivation (2–3 Sätze): Warum diese Rolle, warum jetzt?
+% - Proof (1–2 Absätze): 1–2 relevante Projekte/Erfolge, gerne mit Zahlen
+% - Why \TargetCompany: Bezug zur Stellenausschreibung / Kontext / Tech-Stack
+% - Closing: Verfügbarkeit + Gesprächswunsch
+%
+% Replace the placeholder line below with your actual text.
+\lipsum[1]
+\par
+\lipsum[2]
+\par
+\lipsum[3]
+\par
+
+
+\end{cover_letter}
+
+	\makeLetterClosing
+
+\end{document}
