@@ -218,6 +218,12 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 	}%
 
+	% Optional: ATS sidebar summary — fallback for extractors that ignore
+	% content-stream order. Uncomment to force a single-block sidebar in pdftotext.
+	% \sidebarATSSummary{%
+	% 	Kenntnisse. Programmiersprachen: LaTeX (Experte), ...
+	% }
+
 	\makebody%
 	\clearpage   % Important for creating the new page
 
@@ -274,7 +280,10 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 			\end{cvTagCloud}
 	}%
 
-
+	% Optional: ATS sidebar summary for page 2.
+	% \sidebarATSSummary{%
+	% 	Methodenprofil. Methodik 1: Skill 1, ...
+	% }
 
   	%===============================================================================
   	% PAGE 2 — MAIN CONTENT

@@ -83,6 +83,37 @@
   }%
 }
 
+% Emit the sidebar content.  When a \sidebarATSSummary is active, disable
+% inner AccSupp spans so pdftotext reads only the single outer ActualText
+% (fallback for extractors that ignore content-stream order).
+\newcommand{\cvEmitSidebar}{%
+  \ifdefempty{\cvSidebarAtsSummary}{%
+    \cvHighlightbarContent
+  }{%
+    \begingroup
+    \XeTeXgenerateactualtext=0
+    \cvAtsDisableInnertrue
+    \BeginAccSupp{method=escape,ActualText={\cvSidebarAtsSummary}}%
+    \cvHighlightbarContent
+    \EndAccSupp{}%
+    \endgroup
+  }%
+  \cvResetSidebarAtsSummary
+}
+
+% Render two columns: sidebar left, mainbar right.
+% Content-stream trick: mainbar is emitted FIRST in the PDF stream
+% (inside a zero-width overlay positioned on the right), then the sidebar.
+% Text extractors that respect stream order read mainbar before sidebar,
+% preventing the interleaving that spatial-heuristic extractors produce.
+\newcommand{\cvRenderColumns}[2]{%  % #1 = sidebar, #2 = mainbar
+  \makebox[0pt][l]{%
+    \hspace*{\dimexpr\cvSidebarTextWidth+\cvColSep\relax}%
+    #2%
+  }%
+  #1%
+}
+
 % Render captured columns according to placement mode:
 % - singlesided: keep the same column order on every page
 % - doublesided: mirror column order on even pages
@@ -97,12 +128,12 @@
   \ifcvTwoSided
     \checkoddpage
     \ifoddpage
-      \cvHighlightbarContent\hspace{\cvColSep}\cvMainbarContent%
+      \cvRenderColumns{\cvEmitSidebar}{\cvMainbarContent}%
     \else
-      \cvMainbarContent\hspace{\cvColSep}\cvHighlightbarContent%
+      \cvRenderColumns{\cvMainbarContent}{\cvEmitSidebar}%
     \fi
   \else
-    \cvHighlightbarContent\hspace{\cvColSep}\cvMainbarContent%
+    \cvRenderColumns{\cvEmitSidebar}{\cvMainbarContent}%
   \fi
 }
 

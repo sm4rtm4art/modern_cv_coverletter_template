@@ -394,18 +394,31 @@
 
 
 % --- Skill entries ---
+% #1 = skill name, #2 = level (1–5)
+% ATS strategy: skill name is plain text (readable as-is). AccSupp needs real
+% glyphs to anchor ActualText — kerns/spaces are invisible to pdftotext.
+% We render a zero-width period (\rlap) in the sidebar background color as the
+% anchor glyph, preceded by ~ (non-breaking space) for ATS word separation.
+% Total added width: one interword space (same as original layout).
 \newcommand{\cvSkill}[2]{%
+  \cvResolveSkillLevel{#2}%
   \par\noindent
   \begin{minipage}[t]{\linewidth}
-    \textbf{\color{accent}#1} \hfill \mbox{\cvBar{#2}}
+    \textbf{\color{accent}#1}%
+    ~\AccText{\rlap{\textcolor{highlightbarcolor}{.}}}{(\cvSkillLevelLabel)}%
+    \hfill \mbox{\cvBar{#2}}
   \end{minipage}\par
   \vspace{0.3em}%
 }
 
+% #1 = skill name, #2 = level (1–5), #3 = description
 \newcommand{\cvSkillDetail}[3]{%
+  \cvResolveSkillLevel{#2}%
   \par\noindent
   \begin{minipage}[t]{\linewidth}
-    \textbf{\color{accent}#1} \hfill \mbox{\cvBar{#2}}\par
+    \textbf{\color{accent}#1}%
+    ~\AccText{\rlap{\textcolor{highlightbarcolor}{.}}}{(\cvSkillLevelLabel)}%
+    \hfill \mbox{\cvBar{#2}}\par
     \vspace{0.1em}
     {\lightfont\small\color{mediumgray}\raggedright #3\par}
   \end{minipage}\par
@@ -566,7 +579,7 @@
 \newcommand{\cvMetaStyle}{\small\lightfont\color{mediumgray}\strut}
 
 % Meta line renderers: icon (hidden from ATS) + visible text with ATS layer.
-% #3 = visual date, #4 = ATS plain text.
+% #1 = icon, #2 = ATS label prefix (e.g. \cvLabelDate), #3 = visual, #4 = ATS plain text.
 % Match \cvContactLine pattern: icon in its own box, then AccDate
 % wraps only the inline date text — no enclosing \makebox[\linewidth].
 % Fixed-width boxes break AccSupp BDC/EMC spans in xdvipdfmx.
@@ -575,7 +588,7 @@
     \noindent
     \makebox[\cvMetaIconWidth][c]{\HideFromText{#1}}%
     \hspace{\cvMetaGap}\hfill
-    \AccDate{#3}{#4}%
+    \AccDate{#3}{#2#4}%
   }%
 }
 
@@ -584,7 +597,7 @@
     \noindent
     \makebox[\cvMetaIconWidth][c]{\HideFromText{#1}}%
     \hspace{\cvMetaGap}%
-    \AccDate{#3}{#4}%
+    \AccDate{#3}{#2#4}%
   }%
 }
 
@@ -597,8 +610,16 @@
 }
 
 % --- Overview entries ---
+% Date parsing (xstring + \@for) must happen OUTSIDE tabularx.
+% tabularx trial measurements run in internal vertical mode where
+% \spacefactor-based commands (\@for) fail.
 \newcommand{\cvOverviewEntryBuilder}[7]{%
   \par
+  \begingroup
+  \cvDateParse{#4}%
+  \global\let\cvDateVisResult\cvDateVisTmp
+  \global\let\cvDatePlainResult\cvDatePlainTmp
+  \endgroup
   \noindent
   \begin{tabularx}{\linewidth}{@{} L @{\hspace{\cvColGap}} R{#7} @{}}
     {%
@@ -610,7 +631,7 @@
     &
     {%
       \vspace{0pt}%
-      \cvMetaDateLine{#1}{\cvLabelDate}{#4}\par
+      \cvMetaLineAcc{#1}{\cvLabelDate}{\cvDateVisResult}{\cvDatePlainResult}\par
       \vspace{\cvInternalRowSpacing}%
       \cvMetaLineAcc{\faMapMarker*}{\cvLabelLocation}{#5}{#5}%
     }
@@ -653,10 +674,16 @@
   \addvspace{0.8em}%
   \noindent
   {\color{accent}\large\headingfont\bfseries #2}\hfill
-  {\color{mediumgray}\small\HideFromText{\faCalendarCheck[regular]}\ \cvDateFmtAcc{#3}}%
+  {\color{mediumgray}\small
+    \makebox[\cvMetaIconWidth][c]{\HideFromText{\faCalendarCheck[regular]}}%
+    \hspace{\cvMetaGap}\cvDateFmtAcc{#3}%
+  }%
   \par\vspace{0.4em}%
   {\lightfont\color{body}\large #1}\hfill
-  {\color{mediumgray}\small\HideFromText{\faMapMarker*}\ #4}%
+  {\color{mediumgray}\small
+    \makebox[\cvMetaIconWidth][c]{\HideFromText{\faMapMarker*}}%
+    \hspace{\cvMetaGap}#4%
+  }%
   \par\vspace{\cvJobDetailDescSpacing}%
   {\fontsize{9}{13}\selectfont
     \begin{itemize}[

@@ -31,6 +31,11 @@
     \def\cvLabelAds{ADS: }%
     \def\cvPageWord{Page}%
     \def\cvOfWord{of}%
+    \def\cvSkillLevelI{beginner}%
+    \def\cvSkillLevelII{basic}%
+    \def\cvSkillLevelIII{solid}%
+    \def\cvSkillLevelIV{proficient}%
+    \def\cvSkillLevelV{expert}%
   }{%
     \ifstrequal{#1}{de}{}{%
       \cvwarn{Unknown language '#1'. Falling back to German ('de').}%
@@ -53,6 +58,11 @@
     \def\cvLabelAds{ADS: }%
     \def\cvPageWord{Seite}%
     \def\cvOfWord{von}%
+    \def\cvSkillLevelI{Anfänger}%
+    \def\cvSkillLevelII{Grundkenntnisse}%
+    \def\cvSkillLevelIII{solide}%
+    \def\cvSkillLevelIV{fortgeschritten}%
+    \def\cvSkillLevelV{Experte}%
   }%
 }
 
