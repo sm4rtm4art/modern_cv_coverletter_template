@@ -25,6 +25,21 @@
 \IfFileExists{accsupp.sty}{%
   \RequirePackage{accsupp}%
   \debug{Loaded optional package: accsupp}%
+  % Fix XeTeX/xdvipdfmx ActualText misplacement (StackExchange #262492).
+  % Default accsupp wraps BDC/EMC in coordinate-transformation q/Q pairs,
+  % which grossly offsets the ActualText box. Using pdf:code emits BDC/EMC
+  % directly into the content stream (like pdfTeX's \pdfliteral direct).
+  % Use a group so \makeatletter does not leak \makeatother into callers that
+  % \input this file (cover letter / CV module loaders).
+  \begingroup
+  \makeatletter
+  \gdef\ACCSUPP@bdc{%
+    \special{pdf:code \ACCSUPP@span BDC}%
+  }%
+  \gdef\ACCSUPP@emc{%
+    \special{pdf:code EMC}%
+  }%
+  \endgroup
 }{%
   \cvwarn{Optional package 'accsupp' not found. ATS ActualText support may be reduced.}%
 }
@@ -32,30 +47,31 @@
 \newif\ifcvATSBuild
 \ifdefined\ATSBUILD\cvATSBuildtrue\else\cvATSBuildfalse\fi
 
-
-% Hide decorative symbols (icons/bullets) from ATS text extraction.
-% Locally disables \XeTeXgenerateactualtext so per-glyph ActualText
-% (needed for SF Pro K-glyph fix) does not override accsupp spans.
-% \newcommand{\HideFromText}[1]{%
-%   \begingroup\XeTeXgenerateactualtext=0
-%   \BeginAccSupp{method=hex,unicode,ActualText=00AD}#1\EndAccSupp{}%
-%   \endgroup
-% }
+% When true, inner AccSupp spans are suppressed so an outer
+% \cvAtsReplaceBlock can provide a single ActualText for the whole region
+% (used by \cvEmitSidebar to prevent column interleaving in pdftotext).
+\newif\ifcvAtsDisableInner  \cvAtsDisableInnerfalse
 
 \newcommand{\HideFromText}[1]{%
   \leavevmode
-  \begingroup\XeTeXgenerateactualtext=0
-  \BeginAccSupp{method=hex,unicode,ActualText=0020}#1\EndAccSupp{}%
-  \endgroup
+  \ifcvAtsDisableInner
+    #1%
+  \else
+    \begingroup\XeTeXgenerateactualtext=0
+    \BeginAccSupp{method=hex,unicode,ActualText=0020}#1\EndAccSupp{}%
+    \endgroup
+  \fi
 }
-
-
 
 % Expose visible formatted text with a simpler ATS/plain-text alternative.
 \newcommand{\AccText}[2]{%
-  \begingroup\XeTeXgenerateactualtext=0
-  \BeginAccSupp{method=escape,ActualText={#2}}#1\EndAccSupp{}%
-  \endgroup
+  \ifcvAtsDisableInner
+    #1%
+  \else
+    \begingroup\XeTeXgenerateactualtext=0
+    \BeginAccSupp{method=escape,ActualText={#2}}#1\EndAccSupp{}%
+    \endgroup
+  \fi
 }
 
 % Robust date accessibility helper for XeTeX/xdvipdfmx.
@@ -149,13 +165,13 @@
 %   \def\cvPresentTokens{Aktuell,aktuell,present,Present,current,Current,heute}
 
 % Internal: iterate over \cvPresentTokens and test if any matches.
+% Uses etoolbox \docsvlist (no @-catcode dependency) instead of \@for.
 \newif\ifcvFoundPresent
 \newcommand{\cvIfPresentTokenTF}[3]{%
   \cvZapSpacesTo{#1}{\cvTok}%
   \cvFoundPresentfalse
-  \@for\cvPTmp:=\cvPresentTokens\do{%
-    \IfSubStr{\cvTok}{\cvPTmp}{\cvFoundPresenttrue}{}%
-  }%
+  \renewcommand*{\do}[1]{\IfSubStr{\cvTok}{##1}{\cvFoundPresenttrue}{}}%
+  \expandafter\docsvlist\expandafter{\cvPresentTokens}%
   \ifcvFoundPresent #2\else #3\fi
 }
 
@@ -191,25 +207,34 @@
       \edef\cvDatePlainTmp{\cvLNorm}%
     }{%
       \cvIfPresentTokenTF{\cvRTrim}{%
-        \edef\cvDateVisTmp{\cvLVis\space\textendash\space Aktuell}%
+        \edef\cvDateVisTmp{\cvLVis\space\noexpand\textendash\space Aktuell}%
         \edef\cvDatePlainTmp{\cvLNorm\space-\space\cvTodayMMYYYY}%
       }{%
         \cvDateSideNormalize{\cvRRaw}{\cvRNorm}%
         \edef\cvRNorm{\cvRNorm}% freeze right side
         \cvZapSpacesTo{\cvRRaw}{\cvRVis}%
-        \edef\cvDateVisTmp{\cvLVis\space\textendash\space\cvRVis}%
+        \edef\cvDateVisTmp{\cvLVis\space\noexpand\textendash\space\cvRVis}%
         \edef\cvDatePlainTmp{\cvLNorm\space-\space\cvRNorm}%
       }%
     }%
   \fi
 }
 
+% Global scratch macros for passing date results out of parsing groups.
+% \cvDateParse uses xstring (catcode/stream changes) that can break accsupp
+% BDC/EMC markers if both run in the same group. Solution: parse in a group,
+% export results via \global\let, close the group, then render AccText cleanly.
+\def\cvDateVisResult{}
+\def\cvDatePlainResult{}
+
 % Bridge used by components_cv overview entries.
 \newcommand{\cvMetaDateLine}[3]{%
   \begingroup
   \cvDateParse{#3}%
-  \cvMetaLineAcc{#1}{#2}{\cvDateVisTmp}{\cvDatePlainTmp}%
+  \global\let\cvDateVisResult\cvDateVisTmp
+  \global\let\cvDatePlainResult\cvDatePlainTmp
   \endgroup
+  \cvMetaLineAcc{#1}{#2}{\cvDateVisResult}{\cvDatePlainResult}%
 }
 
 % Public date format helpers for template usage.
@@ -223,8 +248,10 @@
 \newcommand{\cvDateFmtAcc}[1]{%
   \begingroup
   \cvDateParse{#1}%
-  \AccDate{\cvDateVisTmp}{\cvDatePlainTmp}%
+  \global\let\cvDateVisResult\cvDateVisTmp
+  \global\let\cvDatePlainResult\cvDatePlainTmp
   \endgroup
+  \AccDate{\cvDateVisResult}{\cvDatePlainResult}%
 }
 
 % Deferred-safe date formatter: renders ATS-normalized plain text directly.
@@ -238,20 +265,67 @@
 }
 
 %===============================================================================
+% Skill level resolver: map numeric level (1–5) to ATS-readable label.
+% Uses i18n labels \cvSkillLevelI..V defined in i18n_cv.cls.
+% Result stored in \cvSkillLevelLabel.
+%===============================================================================
+\newcommand{\cvSkillLevelLabel}{}
+\newcommand{\cvResolveSkillLevel}[1]{%
+  \ifcase#1\relax
+    \def\cvSkillLevelLabel{?}%
+  \or \def\cvSkillLevelLabel{\cvSkillLevelI}%
+  \or \def\cvSkillLevelLabel{\cvSkillLevelII}%
+  \or \def\cvSkillLevelLabel{\cvSkillLevelIII}%
+  \or \def\cvSkillLevelLabel{\cvSkillLevelIV}%
+  \or \def\cvSkillLevelLabel{\cvSkillLevelV}%
+  \else\def\cvSkillLevelLabel{?}%
+  \fi
+}
+
+% Spoken-language CEFR-oriented labels (\cvLangLevelI..V in i18n_cv.cls).
+\newcommand{\cvResolveLangLevel}[1]{%
+  \ifcase#1\relax
+    \def\cvSkillLevelLabel{?}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelI}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelII}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelIII}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelIV}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelV}%
+  \else\def\cvSkillLevelLabel{?}%
+  \fi
+}
+
+%===============================================================================
 % Contact field ATS text builders.
 % These produce plain-text strings for ATS extraction from structured
 % contact data. Used by components_cv.cls formatters.
 % Depends on: i18n_cv.cls labels (\cvLabelAddress, \cvLabelStreet, etc.)
 %===============================================================================
 
-% Build ATS-readable address string from components.
-% Sets \cvAtsResult to the formatted string.
-% #1=street, #2=zip, #3=city, #4=country (may be empty)
+% Build ATS-readable address string from components (omit blank parts).
+% Sets \cvAtsResult. #1=street, #2=zip, #3=city, #4=country
 \newcommand{\cvAtsAddress}[4]{%
-  \ifblank{#4}{%
-    \edef\cvAtsResult{\cvLabelAddress\cvLabelStreet\space#1, \cvLabelZip\space#2, \cvLabelCity\space#3}%
-  }{%
-    \edef\cvAtsResult{\cvLabelAddress\cvLabelStreet\space#1, \cvLabelZip\space#2, \cvLabelCity\space#3, \cvLabelCountry\space#4}%
+  % Expand args first: callers pass macros like \cvAddressStreet.
+  \edef\cvAtsStreet{#1}%
+  \edef\cvAtsZip{#2}%
+  \edef\cvAtsCity{#3}%
+  \edef\cvAtsCountry{#4}%
+  \def\cvAtsResult{\cvLabelAddress}%
+  \def\cvAtsPartSep{}%
+  \expandafter\ifblank\expandafter{\cvAtsStreet}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelStreet\space\cvAtsStreet}%
+    \def\cvAtsPartSep{, }%
+  }%
+  \expandafter\ifblank\expandafter{\cvAtsZip}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelZip\space\cvAtsZip}%
+    \def\cvAtsPartSep{, }%
+  }%
+  \expandafter\ifblank\expandafter{\cvAtsCity}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelCity\space\cvAtsCity}%
+    \def\cvAtsPartSep{, }%
+  }%
+  \expandafter\ifblank\expandafter{\cvAtsCountry}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelCountry\space\cvAtsCountry}%
   }%
 }
 
@@ -272,7 +346,16 @@
 % Problem: pdftotext reads left-to-right across both columns, interleaving
 % sidebar and mainbar content. Solution: wrap the sidebar in ActualText
 % that emits a clean, sequential summary instead of the visual content.
+%
+% Usage: call \sidebarATSSummary{plain text...} before \makebody.
+% The summary replaces the sidebar's ATS extraction for that page.
+% After \makebody consumes it, it resets automatically.
+% Must be PLAIN TEXT — no TeX formatting commands.
 %===============================================================================
+
+\def\cvSidebarAtsSummary{}
+\newcommand{\sidebarATSSummary}[1]{\def\cvSidebarAtsSummary{#1}}
+\newcommand{\cvResetSidebarAtsSummary}{\def\cvSidebarAtsSummary{}}
 
 % Hide an entire block from ATS text extraction.
 % Unlike \HideFromText (single-line), this works on multi-paragraph content

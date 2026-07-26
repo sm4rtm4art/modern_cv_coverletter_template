@@ -217,10 +217,31 @@
 % ATS text builders live in ats.cls; formatters here handle visual + combiner.
 \newcommand{\cvFormatAddress}{%
   \begingroup
-  \ifblank{\cvAddressCountry}{%
-    \edef\cvVis{\cvAddressStreet, \cvAddressZip\space\cvAddressCity}%
+  % Visual: omit blanks. Locality is "ZIP CITY" (space, no comma between).
+  % Units joined with ", ": street | locality | country
+  % Use \ifdefempty (etoolbox) so macro contents are tested, not the csname.
+  \def\cvVis{}%
+  \def\cvVisSep{}%
+  \ifdefempty{\cvAddressStreet}{}{%
+    \edef\cvVis{\cvVis\cvVisSep\cvAddressStreet}%
+    \def\cvVisSep{, }%
+  }%
+  \ifdefempty{\cvAddressZip}{%
+    \ifdefempty{\cvAddressCity}{}{%
+      \edef\cvVis{\cvVis\cvVisSep\cvAddressCity}%
+      \def\cvVisSep{, }%
+    }%
   }{%
-    \edef\cvVis{\cvAddressStreet, \cvAddressZip\space\cvAddressCity, \cvAddressCountry}%
+    \ifdefempty{\cvAddressCity}{%
+      \edef\cvVis{\cvVis\cvVisSep\cvAddressZip}%
+      \def\cvVisSep{, }%
+    }{%
+      \edef\cvVis{\cvVis\cvVisSep\cvAddressZip\space\cvAddressCity}%
+      \def\cvVisSep{, }%
+    }%
+  }%
+  \ifdefempty{\cvAddressCountry}{}{%
+    \edef\cvVis{\cvVis\cvVisSep\cvAddressCountry}%
   }%
   \cvAtsAddress{\cvAddressStreet}{\cvAddressZip}{\cvAddressCity}{\cvAddressCountry}%
   \cvContactLine{\cvAddressIcon}{\cvVis}{\cvAtsResult}%
@@ -394,18 +415,44 @@
 
 
 % --- Skill entries ---
+% #1 = skill name, #2 = level (1–5)
+% ATS strategy: skill name is plain text (readable as-is). AccSupp needs real
+% glyphs to anchor ActualText — kerns/spaces are invisible to pdftotext.
+% We render a zero-width period (\rlap) in the sidebar background color as the
+% anchor glyph, preceded by ~ (non-breaking space) for ATS word separation.
+% Total added width: one interword space (same as original layout).
 \newcommand{\cvSkill}[2]{%
+  \cvResolveSkillLevel{#2}%
   \par\noindent
   \begin{minipage}[t]{\linewidth}
-    \textbf{\color{accent}#1} \hfill \mbox{\cvBar{#2}}
+    \textbf{\color{accent}#1}%
+    ~\AccText{\rlap{\textcolor{highlightbarcolor}{.}}}{(\cvSkillLevelLabel)}%
+    \hfill \mbox{\cvBar{#2}}
   \end{minipage}\par
   \vspace{0.3em}%
 }
 
-\newcommand{\cvSkillDetail}[3]{%
+% Spoken language with CEFR-oriented ATS labels (same bar UI as \cvSkill).
+% #1 = language name, #2 = level (1–5)
+\newcommand{\cvLang}[2]{%
+  \cvResolveLangLevel{#2}%
   \par\noindent
   \begin{minipage}[t]{\linewidth}
-    \textbf{\color{accent}#1} \hfill \mbox{\cvBar{#2}}\par
+    \textbf{\color{accent}#1}%
+    ~\AccText{\rlap{\textcolor{highlightbarcolor}{.}}}{(\cvSkillLevelLabel)}%
+    \hfill \mbox{\cvBar{#2}}
+  \end{minipage}\par
+  \vspace{0.3em}%
+}
+
+% #1 = skill name, #2 = level (1–5), #3 = description
+\newcommand{\cvSkillDetail}[3]{%
+  \cvResolveSkillLevel{#2}%
+  \par\noindent
+  \begin{minipage}[t]{\linewidth}
+    \textbf{\color{accent}#1}%
+    ~\AccText{\rlap{\textcolor{highlightbarcolor}{.}}}{(\cvSkillLevelLabel)}%
+    \hfill \mbox{\cvBar{#2}}\par
     \vspace{0.1em}
     {\lightfont\small\color{mediumgray}\raggedright #3\par}
   \end{minipage}\par
@@ -566,7 +613,7 @@
 \newcommand{\cvMetaStyle}{\small\lightfont\color{mediumgray}\strut}
 
 % Meta line renderers: icon (hidden from ATS) + visible text with ATS layer.
-% #3 = visual date, #4 = ATS plain text.
+% #1 = icon, #2 = ATS label prefix (e.g. \cvLabelDate), #3 = visual, #4 = ATS plain text.
 % Match \cvContactLine pattern: icon in its own box, then AccDate
 % wraps only the inline date text — no enclosing \makebox[\linewidth].
 % Fixed-width boxes break AccSupp BDC/EMC spans in xdvipdfmx.
@@ -575,7 +622,7 @@
     \noindent
     \makebox[\cvMetaIconWidth][c]{\HideFromText{#1}}%
     \hspace{\cvMetaGap}\hfill
-    \AccDate{#3}{#4}%
+    \AccDate{#3}{#2#4}%
   }%
 }
 
@@ -584,7 +631,7 @@
     \noindent
     \makebox[\cvMetaIconWidth][c]{\HideFromText{#1}}%
     \hspace{\cvMetaGap}%
-    \AccDate{#3}{#4}%
+    \AccDate{#3}{#2#4}%
   }%
 }
 
@@ -597,8 +644,16 @@
 }
 
 % --- Overview entries ---
+% Date parsing (xstring + \@for) must happen OUTSIDE tabularx.
+% tabularx trial measurements run in internal vertical mode where
+% \spacefactor-based commands (\@for) fail.
 \newcommand{\cvOverviewEntryBuilder}[7]{%
   \par
+  \begingroup
+  \cvDateParse{#4}%
+  \global\let\cvDateVisResult\cvDateVisTmp
+  \global\let\cvDatePlainResult\cvDatePlainTmp
+  \endgroup
   \noindent
   \begin{tabularx}{\linewidth}{@{} L @{\hspace{\cvColGap}} R{#7} @{}}
     {%
@@ -610,7 +665,7 @@
     &
     {%
       \vspace{0pt}%
-      \cvMetaDateLine{#1}{\cvLabelDate}{#4}\par
+      \cvMetaLineAcc{#1}{\cvLabelDate}{\cvDateVisResult}{\cvDatePlainResult}\par
       \vspace{\cvInternalRowSpacing}%
       \cvMetaLineAcc{\faMapMarker*}{\cvLabelLocation}{#5}{#5}%
     }
@@ -639,44 +694,70 @@
   \cvOverviewEntryBuilder{\faGraduationCap}{#1}{#2}{#3}{#4}{#5}{\cvEduDateWidth}%
 }
 
-% --- Detailed job entries ---
+% --- Detailed job / experience entries ---
 \newcommand{\cvDetailItem}[2]{\item \textbf{#1} #2}
 
+% Horizontal rule for full-width portfolio pages (between \cvExpDetail blocks).
+\newcommand{\cvDivider}{%
+  \par\vspace{0.025cm}%
+  \noindent{\color{black}\rule{\linewidth}{0.5pt}}%
+  \par\vspace{0.025cm}%
+}
 
 \newlength{\cvJobDetailEmptySpacing} \setlength{\cvJobDetailEmptySpacing}{5mm}
 
 %===============================================================================
-% Job detail builder (layout only — validation is in \cvJobDetail wrapper)
+% Detail builders (layout only — validation is in public wrappers)
+% #1 = context/company, #2 = title/role, #3 = date,
+% #4 = meta icon (e.g. \faMapMarker*), #5 = meta text, #6 = bullets, #7 = tags
 %===============================================================================
-\newcommand{\cvJobDetailBuilder}[6]{%
+\newcommand{\cvDetailBuilder}[7]{%
   \par
   \addvspace{0.8em}%
   \noindent
   {\color{accent}\large\headingfont\bfseries #2}\hfill
-  {\color{mediumgray}\small\HideFromText{\faCalendarCheck[regular]}\ \cvDateFmtAcc{#3}}%
-  \par\vspace{0.4em}%
-  {\lightfont\color{body}\large #1}\hfill
-  {\color{mediumgray}\small\HideFromText{\faMapMarker*}\ #4}%
-  \par\vspace{\cvJobDetailDescSpacing}%
-  {\fontsize{9}{13}\selectfont
-    \begin{itemize}[
-      leftmargin=*, labelsep=0.4em, nosep, itemsep=1.5pt,
-      label={\color{highlight}\raisebox{0.5ex}{\HideFromText{\scalebox{0.25}{\faCircle}}}}
-    ]
-      #5
-    \end{itemize}
+  {\color{mediumgray}\small
+    \makebox[\cvMetaIconWidth][c]{\HideFromText{\faCalendarCheck[regular]}}%
+    \hspace{\cvMetaGap}\cvDateFmtAcc{#3}%
   }%
-  \ifstrempty{#5}{\cvwarn{\string\cvJobDetail has an empty bullet list for '#1'.}}{}%
-  \ifstrequal{#6}{}{%
+  \par\vspace{0.4em}%
+  {\lightfont\color{body}\large #1}%
+  \ifstrempty{#5}{}{%
+    \hfill{\color{mediumgray}\small
+      \ifstrempty{#4}{}{%
+        \makebox[\cvMetaIconWidth][c]{\HideFromText{#4}}%
+        \hspace{\cvMetaGap}%
+      }%
+      #5%
+    }%
+  }%
+  \par\vspace{\cvJobDetailDescSpacing}%
+  \ifstrempty{#6}{%
+    \cvwarn{Detail block has an empty bullet list for '#1'.}%
+  }{%
+    {\fontsize{9}{13}\selectfont
+      \begin{itemize}[
+        leftmargin=*, labelsep=0.4em, nosep, itemsep=1.5pt,
+        label={\color{highlight}\raisebox{0.5ex}{\HideFromText{\scalebox{0.25}{\faCircle}}}}
+      ]
+        #6
+      \end{itemize}
+    }%
+  }%
+  \ifstrequal{#7}{}{%
   % No tags: smaller spacing after the block
   \par\vspace{\cvJobDetailEmptySpacing}%
 }{%
   % Tags present: tag spacing, then tags, then general spacing
   \par\vspace{\cvJobDetailTagSpacing}%
-  {\raggedright\linespread{1.3}\selectfont\noindent\ignorespaces #6\par}%
+  {\raggedright\linespread{1.3}\selectfont\noindent\ignorespaces #7\par}%
   \par\vspace{\cvJobDetailGeneralSpacing}%
 }%
 }%
+
+\newcommand{\cvJobDetailBuilder}[6]{%
+  \cvDetailBuilder{#1}{#2}{#3}{\faMapMarker*}{#4}{#5}{#6}%
+}
 
 
 \NewDocumentCommand{\cvJobDetail}{ m m m m +m O{}}{%
@@ -685,6 +766,17 @@
   \cvAssertNonEmpty{#3}{\string\cvJobDetail date is empty}{Provide a non-empty date value.}%
   \cvAssertNonEmpty{#4}{\string\cvJobDetail location is empty}{Provide a non-empty location value.}%
   \cvJobDetailBuilder{#1}{#2}{#3}{#4}{#5}{#6}%
+}
+
+% Portfolio / project detail (full-width pages).
+% \cvExpDetail{context}{title}{date}[icon]{meta}{bullets}[tags]
+%   icon — optional FA glyph (hidden from ATS via \HideFromText)
+%   meta — plain text / URL / repo path (no icons here)
+\NewDocumentCommand{\cvExpDetail}{ m m m O{} m +m O{}}{%
+  \cvAssertNonEmpty{#1}{\string\cvExpDetail context is empty}{Provide a non-empty context/category value.}%
+  \cvAssertNonEmpty{#2}{\string\cvExpDetail title is empty}{Provide a non-empty title value.}%
+  \cvAssertNonEmpty{#3}{\string\cvExpDetail date is empty}{Provide a non-empty date value.}%
+  \cvDetailBuilder{#1}{#2}{#3}{#4}{#5}{#6}{#7}%
 }
 
 

@@ -1,0 +1,3 @@
+# Keep the directory in git; ignore everything generated inside.
+*
+!.gitignore

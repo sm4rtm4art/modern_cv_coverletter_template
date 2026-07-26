@@ -151,6 +151,7 @@
 \cvLoadModule{i18n_cv}
 \cvLoadModule{layout_cv}
 \cvLoadModule{components_cv}
+\makeatletter % restore after modules that may have changed @ catcode
 \ifdebugMode\cvSharedDebugtrue\fi
 \debug{Completed module load sequence}
 

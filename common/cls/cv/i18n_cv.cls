@@ -31,6 +31,16 @@
     \def\cvLabelAds{ADS: }%
     \def\cvPageWord{Page}%
     \def\cvOfWord{of}%
+    \def\cvSkillLevelI{Basic}%
+    \def\cvSkillLevelII{Intermediate}%
+    \def\cvSkillLevelIII{Advanced}%
+    \def\cvSkillLevelIV{Proficient}%
+    \def\cvSkillLevelV{Expert}%
+    \def\cvLangLevelI{Basic (A1-A2)}%
+    \def\cvLangLevelII{Conversational (B1)}%
+    \def\cvLangLevelIII{Fluent (B2)}%
+    \def\cvLangLevelIV{Business Fluent (C1)}%
+    \def\cvLangLevelV{Native / Bilingual (C2)}%
   }{%
     \ifstrequal{#1}{de}{}{%
       \cvwarn{Unknown language '#1'. Falling back to German ('de').}%
@@ -53,6 +63,16 @@
     \def\cvLabelAds{ADS: }%
     \def\cvPageWord{Seite}%
     \def\cvOfWord{von}%
+    \def\cvSkillLevelI{Grundlagen}%
+    \def\cvSkillLevelII{Erweitert}%
+    \def\cvSkillLevelIII{Fortgeschritten}%
+    \def\cvSkillLevelIV{Vertieft}%
+    \def\cvSkillLevelV{Experte}%
+    \def\cvLangLevelI{Grundkenntnisse (A1-A2)}%
+    \def\cvLangLevelII{Konversationssicher (B1)}%
+    \def\cvLangLevelIII{Fließend (B2)}%
+    \def\cvLangLevelIV{Verhandlungssicher (C1)}%
+    \def\cvLangLevelV{Muttersprache / Zweisprachig (C2)}%
   }%
 }
 

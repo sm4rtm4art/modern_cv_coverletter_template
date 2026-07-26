@@ -1,5 +1,5 @@
 % !TeX program = xelatex
-% !TeX TXS-program:compile = txs:///xelatex
+% !TeX TXS-program:compile = txs:///latexmk
 %
 
 %===============================================================================
@@ -56,16 +56,15 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 % FOOTER
 %===============================================================================
 
-% \makecvfooter{date}{label-page1}{label-page2}{name}
-%   Single page: L=date, C=label1, R=name
-%   Two pages:   L=date, C=label1/label2, R=Seite n von 2
-% \makecvfooter{date}{label-page1}{label-page2}{name}
-%   name = {} defaults to \prefix + \name (auto-detected)
+% \makecvfooter{date}{label-page1}{label-page2}{label-page3}[name]
+%   Single page: L=date, C=label1, R=name (optional [name], else \prefix+\name)
+%   Multi-page:  L=date, C=label1/label2/label3, R=Seite n von N
+%   label-page3 is used on \pagestyle{mainonly} full-width pages
 \makecvfooter
   {\today}
   {Tabellarischer Lebenslauf}
   {Detaillierte Arbeitserfahrung}
-  {}
+  {Projekte \& Portfolio}
 
 
 % --- Personal data ---
@@ -74,7 +73,10 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 % --- Contact block ---
 % Keep contact rows inside \tagline for a single, reusable header API.
 \tagline{
-	% Address format: {street and number}{zip code}{city}
+	% Address: {street}{zip}{city}{country} — omit blanks (country optional).
+	% Full:  \address{Hauptstraße 101}{D-12345}{Berlin}{Deutschland}
+	% City+: \address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}  → visual "Berlin, Deutschland"
+	% DE apps often omit country: \address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}
 	\address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}
 	\phone{+49}{0150 12345678}
 	\email{max\_mustermann@email.de}
@@ -138,8 +140,9 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 		\cvSideSection[\faGlobe]{Sprachen}
 		%\cvSideSection{Sprachen}
-		\cvSkill{Deutsch / Englisch}{5}
-		\cvSkill{Französisch}{3}
+		% \cvLang uses CEFR-oriented ATS labels (not tech skill labels)
+		\cvLang{Deutsch / Englisch}{5}
+		\cvLang{Französisch}{3}
 
 		\vspace{0.5cm} %optional
 
@@ -218,6 +221,12 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 	}%
 
+	% Optional: ATS sidebar summary — fallback for extractors that ignore
+	% content-stream order. Uncomment to force a single-block sidebar in pdftotext.
+	% \sidebarATSSummary{%
+	% 	Kenntnisse. Programmiersprachen: LaTeX (Experte), ...
+	% }
+
 	\makebody%
 	\clearpage   % Important for creating the new page
 
@@ -274,7 +283,10 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 			\end{cvTagCloud}
 	}%
 
-
+	% Optional: ATS sidebar summary for page 2.
+	% \sidebarATSSummary{%
+	% 	Methodenprofil. Methodik 1: Skill 1, ...
+	% }
 
   	%===============================================================================
   	% PAGE 2 — MAIN CONTENT
@@ -349,7 +361,55 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 }%
 
+\makebody%
+\clearpage
 
+%===============================================================================
+% PAGE 3 — FULL-WIDTH PORTFOLIO (no highlightbar)
+%===============================================================================
+
+\pagestyle{mainonly}
+\thispagestyle{mainonly}
+\fullbar{
+
+	\section[\faProjectDiagram]{Ausgewählte Projekte \& Open Source}
+
+	% \cvExpDetail{context}{title}{date}[icon]{meta}{bullets}[tags]
+	\cvExpDetail
+	{Kontext 1 | Kategorie}
+	{Projekttitel 1}
+	{01|2026\textendash Aktuell}
+	[\faGithub]
+	{beispielnutzer/projekt-1}
+	{
+		\cvDetailItem{Optional:}
+		{Kurzbeschreibung des Projekts und der Zielsetzung.}
+		\cvDetailItem{Optional:}
+		{Weitere Details zu Umsetzung, Umfang oder Ergebnis.}
+	}
+	[{
+		\cvJobTags{Tag 1, Tag 2, Tag 3, Tag 4}
+	}]
+
+	\cvDivider
+
+	\cvExpDetail
+	{Kontext 2 | Kategorie}
+	{Projekttitel 2}
+	{12|2025\textendash Aktuell}
+	[\faGithub]
+	{beispielnutzer/projekt-2}
+	{
+		\cvDetailItem{Optional:}
+		{Kurzbeschreibung des Projekts und der Zielsetzung.}
+		\cvDetailItem{Optional:}
+		{Weitere Details zu Umsetzung, Umfang oder Ergebnis.}
+	}
+	[{
+		\cvJobTags{Tag 1, Tag 2, Tag 3}
+	}]
+
+}%
 
 \makebody%
 

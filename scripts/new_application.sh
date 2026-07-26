@@ -27,6 +27,7 @@ EXCLUDE_PATTERNS=(
   '*.snm' '*.toc' '*.run.xml'
   '*.xdv' '*.vrb' '*.pdf'
   'missfont.log'
+  'build/*'
 )
 
 # ---------------------------------------------------------------------------
@@ -172,6 +173,10 @@ cat > "$dest/.gitignore" <<'GITIGNORE'
 missfont.log
 .DS_Store
 
+# latexmk aux directory (PDF + .synctex.gz stay next to .tex)
+build/*
+!build/.gitignore
+
 # Keep PDFs in sendouts/, ignore working PDFs
 *.pdf
 !sendouts/*.pdf
@@ -195,6 +200,6 @@ echo "  ${dest_rel}"
 echo ""
 echo "Next steps:"
 echo "  1. Edit the .tex files in ${dest_rel}/"
-echo "  2. Compile with XeLaTeX (see % !TeX program = xelatex in the files)"
+echo "  2. Compile with latexmk / TeXStudio (magic comments use txs:///latexmk; aux → build/)"
 echo "  3. Place final PDFs in ${dest_rel}/sendouts/"
 echo "  4. Use 'git -C ${dest_rel} log' to view document history"

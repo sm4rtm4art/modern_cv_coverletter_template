@@ -352,6 +352,9 @@ applications/**/*.log
 applications/**/*.xdv
 applications/**/*.pdf
 applications/**/*.synctex.gz
+applications/**/build/**
+!applications/**/build/
+!applications/**/build/.gitignore
 
 Backup/
 

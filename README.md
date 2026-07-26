@@ -120,15 +120,43 @@ A warning is logged when falling back: `[CV-WARN] SF Pro Text not found — usin
 
 ### Footer
 
-**CV footer** (max 2 pages, configured in `.tex`):
+**CV footer** (configured in `.tex`):
 
 ```latex
 \makecvfooter
-  {\today}                          % Left: date
+  {\today}                          % Left: date (all pages)
   {Tabellarischer Lebenslauf}       % Center: page 1 label
   {Detaillierte Arbeitserfahrung}   % Center: page 2 label
-  {}                                % Right: auto-detected from \prefix + \name
+  {Projekte \& Portfolio}           % Center: page 3+ (mainonly) label
+  % optional: [Dr. Max Mustermann]  % Right on single-page CVs; else \prefix+\name
 ```
+
+Right field: name on 1-page CVs, otherwise `Seite n von N` / `Page n of N`.
+
+### Full-width page 3 (portfolio)
+
+Two-column pages use `\highlightbar` + `\mainbar`. For a full-width addendum:
+
+```latex
+\clearpage
+\pagestyle{mainonly}
+\thispagestyle{mainonly}
+\fullbar{
+  \section[\faProjectDiagram]{Selected Projects}
+  \cvExpDetail{Context 1}{Project Title 1}{01|2026\textendash Present}
+    [\faGithub]{exampleuser/project-1}
+    {\cvDetailItem{Optional:}{Short project description.}}
+    [{\cvJobTags{Tag 1, Tag 2}}]
+  \cvDivider
+  % ... more \cvExpDetail blocks ...
+}
+\makebody
+```
+
+- `\fullbar` — full-width body (no sidebar)
+- `\pagestyle{mainonly}` — footer uses label-page3 (no highlightbar layers)
+- `\cvExpDetail{context}{title}{date}[icon]{meta}{bullets}[tags]` — portfolio entry; put FA icons in `[icon]`, not in meta (icons are hidden from ATS)
+- `\cvDivider` — thin horizontal rule between entries
 
 ### Skill bars
 
@@ -139,7 +167,44 @@ Two styles available (set in `.tex`):
 \cvUseSkillBarStyle{classic}    % Simpler filled bars
 ```
 
-Custom palette:
+Tech skills use `\cvSkill{Name}{1-5}` with ATS labels:
+
+| Level | EN | DE |
+|------:|----|----|
+| 1 | Basic | Grundlagen |
+| 2 | Intermediate | Erweitert |
+| 3 | Advanced | Fortgeschritten |
+| 4 | Proficient | Vertieft |
+| 5 | Expert | Experte |
+
+Spoken languages use `\cvLang{Name}{1-5}` (CEFR-oriented ATS labels, same bars):
+
+| Level | EN | DE |
+|------:|----|----|
+| 1 | Basic (A1-A2) | Grundkenntnisse (A1-A2) |
+| 2 | Conversational (B1) | Konversationssicher (B1) |
+| 3 | Fluent (B2) | Fließend (B2) |
+| 4 | Business Fluent (C1) | Verhandlungssicher (C1) |
+| 5 | Native / Bilingual (C2) | Muttersprache / Zweisprachig (C2) |
+
+### Address
+
+```latex
+% {street}{zip}{city}{country} — blank parts omitted; country optional
+\address{Hauptstraße 101}{D-12345}{Berlin}{Deutschland}
+% → visual: Hauptstraße 101, D-12345 Berlin, Deutschland
+% → ATS: Adresse: Straße: …, PLZ: …, Stadt: …, Land: …
+
+\address{}{}{Berlin}{Deutschland}
+% → visual: Berlin, Deutschland
+% → ATS: Adresse: Stadt: Berlin, Land: Deutschland
+
+\address{Hauptstraße 101}{D-12345}{Berlin}{}   % no country
+```
+
+Omit `\address{...}` entirely inside `\tagline` if you want no address line.
+
+Custom skill-bar palette:
 
 ```latex
 \cvSetSkillPalette
@@ -175,12 +240,27 @@ normalized for ATS parsers via `ActualText` (e.g. `12/2025 - 02/2026`).
 
 ## TeXStudio tips
 
-- Log prefixes for filtering: `[CV-INFO]`, `[CV-WARN]`, `[CV-ERROR]`, `[CV-DEBUG]`
-- Debug mode: add `debug` to document class options to enable verbose output:
-  ```latex
-  \documentclass[debug, paper=a4]{../../common/cls/cv/main_cv}
-  ```
-- Warnings and errors use `\ClassWarning` and `\ClassError`, which integrate with TeXStudio's error/warning panels.
+Templates use **latexmk + XeLaTeX**. Magic comments at the top of each `.tex` file:
+
+```latex
+% !TeX program = xelatex
+% !TeX TXS-program:compile = txs:///latexmk
+```
+
+Auxiliary files (`.aux`, `.log`, `.fls`, `.fdb_latexmk`, `.xdv`, …) go to `./build/` via `.latexmkrc`. The `.pdf` and `.synctex.gz` stay next to the `.tex` file.
+
+**Errors in the TeXStudio UI:** TeXStudio reads the `.log` after compile. With `aux_dir=build`, point it at that folder once:
+
+1. Options → Configure TeXstudio → Build
+2. Additional Search Paths → Log File → add `./build`
+
+Class messages (`[CV-INFO]`, `[CV-WARN]`, `[CV-ERROR]`, `[CV-DEBUG]`) still appear in the log; `\ClassWarning` / `\ClassError` feed the usual panels once the log path is found.
+
+Debug mode: add `debug` to document class options for verbose output:
+
+```latex
+\documentclass[debug, paper=a4]{../../common/cls/cv/main_cv}
+```
 
 ## CI/CD
 

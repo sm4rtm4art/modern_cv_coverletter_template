@@ -2,7 +2,7 @@
 % layout_cv.cls
 % Page layers, page styles, footer API, and two-column body composition.
 %
-% Provides: \makecvfooter, \highlightbar, \mainbar, \makebody, page styles.
+% Provides: \makecvfooter, \highlightbar, \mainbar, \fullbar, \makebody, page styles.
 % Depends on: defaults_cv.cls (geometry), i18n_cv.cls (\cvPageWord, \cvOfWord),
 %             shared_adjustment.cls (colors, logging), lastpage+refcount packages.
 % Used by: Lebenslauf.tex (via \makecvfooter, \highlightbar, \mainbar, \makebody)
@@ -41,6 +41,7 @@
 % Body layout state flags
 \newif\ifcvInHighlightbar  \cvInHighlightbarfalse
 \newif\ifcvFirstSection    \cvFirstSectionfalse
+\newif\ifcvFullWidthBody   \cvFullWidthBodyfalse
 
 % Body content buffers
 \def\cvHighlightbarContent{}%
@@ -53,6 +54,7 @@
 
 % Capture sidebar content
 \newcommand{\highlightbar}[1]{%
+  \cvFullWidthBodyfalse
   \def\cvHighlightbarContent{%
     \begin{minipage}[t]{\cvSidebarTextWidth}%
       \begingroup
@@ -69,6 +71,7 @@
 
 % Capture main content
 \newcommand{\mainbar}[1]{%
+  \cvFullWidthBodyfalse
   \def\cvMainbarContent{%
     \begin{minipage}[t]{\dimexpr\textwidth-\cvSidebarTextWidth-\cvColSep\relax}%
       \begingroup
@@ -83,26 +86,84 @@
   }%
 }
 
+% Capture full-width content for pages without a highlightbar.
+% Templates should set \pagestyle{mainonly} / \thispagestyle{mainonly} for these pages.
+\newcommand{\fullbar}[1]{%
+  \cvFullWidthBodytrue
+  \def\cvHighlightbarContent{}%
+  \def\cvMainbarContent{%
+    \begin{minipage}[t]{\textwidth}%
+      \begingroup
+      \cvInHighlightbarfalse
+      \cvFirstSectiontrue
+      \setlength{\parskip}{0pt}%
+      \setlength{\parindent}{0pt}%
+      \vspace*{\bodytopskip}%
+      #1%
+      \endgroup
+    \end{minipage}%
+  }%
+}
+
+% Emit the sidebar content.  When a \sidebarATSSummary is active, disable
+% inner AccSupp spans so pdftotext reads only the single outer ActualText
+% (fallback for extractors that ignore content-stream order).
+\newcommand{\cvEmitSidebar}{%
+  \ifdefempty{\cvSidebarAtsSummary}{%
+    \cvHighlightbarContent
+  }{%
+    \begingroup
+    \XeTeXgenerateactualtext=0
+    \cvAtsDisableInnertrue
+    \BeginAccSupp{method=escape,ActualText={\cvSidebarAtsSummary}}%
+    \cvHighlightbarContent
+    \EndAccSupp{}%
+    \endgroup
+  }%
+  \cvResetSidebarAtsSummary
+}
+
+% Render two columns: sidebar left, mainbar right.
+% Content-stream trick: mainbar is emitted FIRST in the PDF stream
+% (inside a zero-width overlay positioned on the right), then the sidebar.
+% Text extractors that respect stream order read mainbar before sidebar,
+% preventing the interleaving that spatial-heuristic extractors produce.
+\newcommand{\cvRenderColumns}[2]{%  % #1 = sidebar, #2 = mainbar
+  \makebox[0pt][l]{%
+    \hspace*{\dimexpr\cvSidebarTextWidth+\cvColSep\relax}%
+    #2%
+  }%
+  #1%
+}
+
 % Render captured columns according to placement mode:
+% - full-width (\fullbar): emit main content only
 % - singlesided: keep the same column order on every page
 % - doublesided: mirror column order on even pages
 \newcommand{\makebody}{%
-  \ifblank{\cvHighlightbarContent}{%
-    \cvwarn{No sidebar content found. Did you call \string\highlightbar{...}?}%
-  }{}%
-  \ifblank{\cvMainbarContent}{%
-    \cvwarn{No main content found. Did you call \string\mainbar{...}?}%
-  }{}%
-
-  \ifcvTwoSided
-    \checkoddpage
-    \ifoddpage
-      \cvHighlightbarContent\hspace{\cvColSep}\cvMainbarContent%
-    \else
-      \cvMainbarContent\hspace{\cvColSep}\cvHighlightbarContent%
-    \fi
+  \ifcvFullWidthBody
+    \ifblank{\cvMainbarContent}{%
+      \cvwarn{No full-width content found. Did you call \string\fullbar{...}?}%
+    }{}%
+    \cvMainbarContent%
   \else
-    \cvHighlightbarContent\hspace{\cvColSep}\cvMainbarContent%
+    \ifblank{\cvHighlightbarContent}{%
+      \cvwarn{No sidebar content found. Did you call \string\highlightbar{...}?}%
+    }{}%
+    \ifblank{\cvMainbarContent}{%
+      \cvwarn{No main content found. Did you call \string\mainbar{...}?}%
+    }{}%
+
+    \ifcvTwoSided
+      \checkoddpage
+      \ifoddpage
+        \cvRenderColumns{\cvEmitSidebar}{\cvMainbarContent}%
+      \else
+        \cvRenderColumns{\cvMainbarContent}{\cvEmitSidebar}%
+      \fi
+    \else
+      \cvRenderColumns{\cvEmitSidebar}{\cvMainbarContent}%
+    \fi
   \fi
 }
 
@@ -113,25 +174,28 @@
 \def\cvFooterDate{}
 \def\cvFooterLabelOne{}
 \def\cvFooterLabelTwo{}
+\def\cvFooterLabelThree{}
 \def\cvFooterName{}
 
-% \makecvfooter{date}{label-page1}{label-page2}{name}
+% \makecvfooter{date}{label-page1}{label-page2}{label-page3}[name]
 %   date       — left field on all pages (e.g. \today)
 %   label-page1 — center field on page 1 (e.g. "Tabellarischer Lebenslauf")
 %   label-page2 — center field on page 2 (e.g. "Detaillierte Arbeitserfahrung")
-%   name       — right field on single-page CVs (e.g. "Dr. Max Mustermann")
+%   label-page3 — center field on main-only portfolio/addendum pages
+%   name       — optional right field on single-page CVs (e.g. "Dr. Max Mustermann")
 %
 % Right field behavior (auto-detected via lastpage):
 %   1 page:  shows name
-%   2 pages: shows "Seite n von 2"
-\newcommand{\makecvfooter}[4]{%
+%   2+ pages: shows "Seite n von N"
+\NewDocumentCommand{\makecvfooter}{m m m m O{}}{%
   \def\cvFooterDate{#1}%
   \def\cvFooterLabelOne{#2}%
   \def\cvFooterLabelTwo{#3}%
-  \ifblank{#4}{%
+  \def\cvFooterLabelThree{#4}%
+  \ifblank{#5}{%
     \def\cvFooterName{\cvFullNamePlain}%
   }{%
-    \def\cvFooterName{#4}%
+    \def\cvFooterName{#5}%
   }%
 }
 
@@ -163,11 +227,21 @@
       \cvPageWord~\thepage~\cvOfWord~\number\getpagerefnumber{LastPage}\hspace{\marginright}}}}}
 ]{footer.two}
 
+% Footer layer: main-only addendum pages (no header/highlightbar).
+\DeclareNewLayer[foreground, page, mode=picture,
+  contents={\putLL{\raisebox{0.35\marginbottom}{%
+    \rlap{\makebox[\layerwidth][l]{\hspace{\marginleft}\footnotesize\color{mediumgray}\cvFooterDate}}%
+    \rlap{\makebox[\layerwidth][c]{\footnotesize\color{mediumgray}\cvFooterLabelThree}}%
+    \makebox[\layerwidth][r]{\footnotesize\color{mediumgray}%
+      \cvPageWord~\thepage~\cvOfWord~\number\getpagerefnumber{LastPage}\hspace{\marginright}}}}}
+]{footer.three}
+
 % Page styles
 \DeclareNewPageStyleByLayers{headerhighlightmain}{%
   highlightbar.even, highlightbar.odd, header.bg, footer.one}
 \DeclareNewPageStyleByLayers{highlightmain}{%
   highlightbar.even, highlightbar.odd, footer.two}
+\DeclareNewPageStyleByLayers{mainonly}{footer.three}
 \DeclareNewPageStyleByLayers{headermain}{header.bg}
 
 % Clear all header/footer fields
