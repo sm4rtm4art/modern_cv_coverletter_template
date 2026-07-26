@@ -73,7 +73,10 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 % --- Contact block ---
 % Keep contact rows inside \tagline for a single, reusable header API.
 \tagline{
-	% Address format: {street and number}{zip code}{city}
+	% Address: {street}{zip}{city}{country} — omit blanks (country optional).
+	% Full:  \address{Hauptstraße 101}{D-12345}{Berlin}{Deutschland}
+	% City+: \address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}  → visual "Berlin, Deutschland"
+	% DE apps often omit country: \address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}
 	\address{Hauptstraße 101}{D-12345}{Stadt}{Deutschland}
 	\phone{+49}{0150 12345678}
 	\email{max\_mustermann@email.de}
@@ -137,8 +140,9 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 		\cvSideSection[\faGlobe]{Sprachen}
 		%\cvSideSection{Sprachen}
-		\cvSkill{Deutsch / Englisch}{5}
-		\cvSkill{Französisch}{3}
+		% \cvLang uses CEFR-oriented ATS labels (not tech skill labels)
+		\cvLang{Deutsch / Englisch}{5}
+		\cvLang{Französisch}{3}
 
 		\vspace{0.5cm} %optional
 

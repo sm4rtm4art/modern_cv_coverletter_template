@@ -167,7 +167,44 @@ Two styles available (set in `.tex`):
 \cvUseSkillBarStyle{classic}    % Simpler filled bars
 ```
 
-Custom palette:
+Tech skills use `\cvSkill{Name}{1-5}` with ATS labels:
+
+| Level | EN | DE |
+|------:|----|----|
+| 1 | Basic | Grundlagen |
+| 2 | Intermediate | Erweitert |
+| 3 | Advanced | Fortgeschritten |
+| 4 | Proficient | Vertieft |
+| 5 | Expert | Experte |
+
+Spoken languages use `\cvLang{Name}{1-5}` (CEFR-oriented ATS labels, same bars):
+
+| Level | EN | DE |
+|------:|----|----|
+| 1 | Basic (A1-A2) | Grundkenntnisse (A1-A2) |
+| 2 | Conversational (B1) | Konversationssicher (B1) |
+| 3 | Fluent (B2) | Fließend (B2) |
+| 4 | Business Fluent (C1) | Verhandlungssicher (C1) |
+| 5 | Native / Bilingual (C2) | Muttersprache / Zweisprachig (C2) |
+
+### Address
+
+```latex
+% {street}{zip}{city}{country} — blank parts omitted; country optional
+\address{Hauptstraße 101}{D-12345}{Berlin}{Deutschland}
+% → visual: Hauptstraße 101, D-12345 Berlin, Deutschland
+% → ATS: Adresse: Straße: …, PLZ: …, Stadt: …, Land: …
+
+\address{}{}{Berlin}{Deutschland}
+% → visual: Berlin, Deutschland
+% → ATS: Adresse: Stadt: Berlin, Land: Deutschland
+
+\address{Hauptstraße 101}{D-12345}{Berlin}{}   % no country
+```
+
+Omit `\address{...}` entirely inside `\tagline` if you want no address line.
+
+Custom skill-bar palette:
 
 ```latex
 \cvSetSkillPalette

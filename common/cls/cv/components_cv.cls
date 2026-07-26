@@ -217,10 +217,31 @@
 % ATS text builders live in ats.cls; formatters here handle visual + combiner.
 \newcommand{\cvFormatAddress}{%
   \begingroup
-  \ifblank{\cvAddressCountry}{%
-    \edef\cvVis{\cvAddressStreet, \cvAddressZip\space\cvAddressCity}%
+  % Visual: omit blanks. Locality is "ZIP CITY" (space, no comma between).
+  % Units joined with ", ": street | locality | country
+  % Use \ifdefempty (etoolbox) so macro contents are tested, not the csname.
+  \def\cvVis{}%
+  \def\cvVisSep{}%
+  \ifdefempty{\cvAddressStreet}{}{%
+    \edef\cvVis{\cvVis\cvVisSep\cvAddressStreet}%
+    \def\cvVisSep{, }%
+  }%
+  \ifdefempty{\cvAddressZip}{%
+    \ifdefempty{\cvAddressCity}{}{%
+      \edef\cvVis{\cvVis\cvVisSep\cvAddressCity}%
+      \def\cvVisSep{, }%
+    }%
   }{%
-    \edef\cvVis{\cvAddressStreet, \cvAddressZip\space\cvAddressCity, \cvAddressCountry}%
+    \ifdefempty{\cvAddressCity}{%
+      \edef\cvVis{\cvVis\cvVisSep\cvAddressZip}%
+      \def\cvVisSep{, }%
+    }{%
+      \edef\cvVis{\cvVis\cvVisSep\cvAddressZip\space\cvAddressCity}%
+      \def\cvVisSep{, }%
+    }%
+  }%
+  \ifdefempty{\cvAddressCountry}{}{%
+    \edef\cvVis{\cvVis\cvVisSep\cvAddressCountry}%
   }%
   \cvAtsAddress{\cvAddressStreet}{\cvAddressZip}{\cvAddressCity}{\cvAddressCountry}%
   \cvContactLine{\cvAddressIcon}{\cvVis}{\cvAtsResult}%
@@ -402,6 +423,19 @@
 % Total added width: one interword space (same as original layout).
 \newcommand{\cvSkill}[2]{%
   \cvResolveSkillLevel{#2}%
+  \par\noindent
+  \begin{minipage}[t]{\linewidth}
+    \textbf{\color{accent}#1}%
+    ~\AccText{\rlap{\textcolor{highlightbarcolor}{.}}}{(\cvSkillLevelLabel)}%
+    \hfill \mbox{\cvBar{#2}}
+  \end{minipage}\par
+  \vspace{0.3em}%
+}
+
+% Spoken language with CEFR-oriented ATS labels (same bar UI as \cvSkill).
+% #1 = language name, #2 = level (1–5)
+\newcommand{\cvLang}[2]{%
+  \cvResolveLangLevel{#2}%
   \par\noindent
   \begin{minipage}[t]{\linewidth}
     \textbf{\color{accent}#1}%

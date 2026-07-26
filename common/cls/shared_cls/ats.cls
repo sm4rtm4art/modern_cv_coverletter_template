@@ -282,6 +282,19 @@
   \fi
 }
 
+% Spoken-language CEFR-oriented labels (\cvLangLevelI..V in i18n_cv.cls).
+\newcommand{\cvResolveLangLevel}[1]{%
+  \ifcase#1\relax
+    \def\cvSkillLevelLabel{?}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelI}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelII}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelIII}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelIV}%
+  \or \def\cvSkillLevelLabel{\cvLangLevelV}%
+  \else\def\cvSkillLevelLabel{?}%
+  \fi
+}
+
 %===============================================================================
 % Contact field ATS text builders.
 % These produce plain-text strings for ATS extraction from structured
@@ -289,14 +302,30 @@
 % Depends on: i18n_cv.cls labels (\cvLabelAddress, \cvLabelStreet, etc.)
 %===============================================================================
 
-% Build ATS-readable address string from components.
-% Sets \cvAtsResult to the formatted string.
-% #1=street, #2=zip, #3=city, #4=country (may be empty)
+% Build ATS-readable address string from components (omit blank parts).
+% Sets \cvAtsResult. #1=street, #2=zip, #3=city, #4=country
 \newcommand{\cvAtsAddress}[4]{%
-  \ifblank{#4}{%
-    \edef\cvAtsResult{\cvLabelAddress\cvLabelStreet\space#1, \cvLabelZip\space#2, \cvLabelCity\space#3}%
-  }{%
-    \edef\cvAtsResult{\cvLabelAddress\cvLabelStreet\space#1, \cvLabelZip\space#2, \cvLabelCity\space#3, \cvLabelCountry\space#4}%
+  % Expand args first: callers pass macros like \cvAddressStreet.
+  \edef\cvAtsStreet{#1}%
+  \edef\cvAtsZip{#2}%
+  \edef\cvAtsCity{#3}%
+  \edef\cvAtsCountry{#4}%
+  \def\cvAtsResult{\cvLabelAddress}%
+  \def\cvAtsPartSep{}%
+  \expandafter\ifblank\expandafter{\cvAtsStreet}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelStreet\space\cvAtsStreet}%
+    \def\cvAtsPartSep{, }%
+  }%
+  \expandafter\ifblank\expandafter{\cvAtsZip}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelZip\space\cvAtsZip}%
+    \def\cvAtsPartSep{, }%
+  }%
+  \expandafter\ifblank\expandafter{\cvAtsCity}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelCity\space\cvAtsCity}%
+    \def\cvAtsPartSep{, }%
+  }%
+  \expandafter\ifblank\expandafter{\cvAtsCountry}{}{%
+    \edef\cvAtsResult{\cvAtsResult\cvAtsPartSep\cvLabelCountry\space\cvAtsCountry}%
   }%
 }
 
