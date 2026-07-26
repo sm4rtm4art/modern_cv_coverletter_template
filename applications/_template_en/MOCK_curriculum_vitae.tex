@@ -1,5 +1,5 @@
 % !TeX program = xelatex
-% !TeX TXS-program:compile = txs:///xelatex
+% !TeX TXS-program:compile = txs:///latexmk
 %
 
 %===============================================================================
@@ -55,16 +55,15 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 % FOOTER
 %===============================================================================
 
-% \makecvfooter{date}{label-page1}{label-page2}{name}
-%   Single page: L=date, C=label1, R=name
-%   Two pages:   L=date, C=label1/label2, R=Seite n von 2
-% \makecvfooter{date}{label-page1}{label-page2}{name}
-%   name = {} defaults to \prefix + \name (auto-detected)
+% \makecvfooter{date}{label-page1}{label-page2}{label-page3}[name]
+%   Single page: L=date, C=label1, R=name (optional [name], else \prefix+\name)
+%   Multi-page:  L=date, C=label1/label2/label3, R=Page n of N
+%   label-page3 is used on \pagestyle{mainonly} full-width pages
 \makecvfooter
   {\today}
   {Curriculum Vitae}
   {Detailed Work Experience}
-  {}
+  {Projects \& Portfolio}
 
 
 %===============================================================================
@@ -72,12 +71,6 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 %===============================================================================
 
 \begin{document}
-
-\makecvfooter
-  {\today}
-  {Resume}
-  {Detailed Workexperience}
-  {}
 
 
 % --- Personal data ---
@@ -348,8 +341,54 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 		}%
 
-
-
 	\makebody
+	\clearpage
+
+%===============================================================================
+% PAGE 3 — FULL-WIDTH PORTFOLIO (no highlightbar)
+%===============================================================================
+
+\pagestyle{mainonly}
+\thispagestyle{mainonly}
+\fullbar{
+
+	\section[\faProjectDiagram]{Selected Projects \& Open Source}
+
+	% \cvExpDetail{context}{title}{date}{meta}{bullets}[tags]
+	\cvExpDetail
+	{Context 1 | Category}
+	{Project Title 1}
+	{01|2026\textendash Present}
+	{\faGithub \hspace{0.35em} exampleuser/project-1}
+	{
+		\cvDetailItem{Optional:}
+		{Short description of the project and its goal.}
+		\cvDetailItem{Optional:}
+		{Further details on approach, scope, or outcome.}
+	}
+	[{
+		\cvJobTags{Tag 1, Tag 2, Tag 3, Tag 4}
+	}]
+
+	\cvDivider
+
+	\cvExpDetail
+	{Context 2 | Category}
+	{Project Title 2}
+	{12|2025\textendash Present}
+	{\faGithub \hspace{0.35em} exampleuser/project-2}
+	{
+		\cvDetailItem{Optional:}
+		{Short description of the project and its goal.}
+		\cvDetailItem{Optional:}
+		{Further details on approach, scope, or outcome.}
+	}
+	[{
+		\cvJobTags{Tag 1, Tag 2, Tag 3}
+	}]
+
+}%
+
+\makebody
 
 \end{document}

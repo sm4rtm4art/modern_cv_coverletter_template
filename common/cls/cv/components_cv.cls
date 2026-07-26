@@ -660,16 +660,24 @@
   \cvOverviewEntryBuilder{\faGraduationCap}{#1}{#2}{#3}{#4}{#5}{\cvEduDateWidth}%
 }
 
-% --- Detailed job entries ---
+% --- Detailed job / experience entries ---
 \newcommand{\cvDetailItem}[2]{\item \textbf{#1} #2}
 
+% Horizontal rule for full-width portfolio pages (between \cvExpDetail blocks).
+\newcommand{\cvDivider}{%
+  \par\vspace{0.025cm}%
+  \noindent{\color{black}\rule{\linewidth}{0.5pt}}%
+  \par\vspace{0.025cm}%
+}
 
 \newlength{\cvJobDetailEmptySpacing} \setlength{\cvJobDetailEmptySpacing}{5mm}
 
 %===============================================================================
-% Job detail builder (layout only — validation is in \cvJobDetail wrapper)
+% Detail builders (layout only — validation is in public wrappers)
+% #1 = context/company, #2 = title/role, #3 = date,
+% #4 = meta icon (e.g. \faMapMarker*), #5 = meta text, #6 = bullets, #7 = tags
 %===============================================================================
-\newcommand{\cvJobDetailBuilder}[6]{%
+\newcommand{\cvDetailBuilder}[7]{%
   \par
   \addvspace{0.8em}%
   \noindent
@@ -679,10 +687,15 @@
     \hspace{\cvMetaGap}\cvDateFmtAcc{#3}%
   }%
   \par\vspace{0.4em}%
-  {\lightfont\color{body}\large #1}\hfill
-  {\color{mediumgray}\small
-    \makebox[\cvMetaIconWidth][c]{\HideFromText{\faMapMarker*}}%
-    \hspace{\cvMetaGap}#4%
+  {\lightfont\color{body}\large #1}%
+  \ifstrempty{#5}{}{%
+    \hfill{\color{mediumgray}\small
+      \ifstrempty{#4}{}{%
+        \makebox[\cvMetaIconWidth][c]{\HideFromText{#4}}%
+        \hspace{\cvMetaGap}%
+      }%
+      #5%
+    }%
   }%
   \par\vspace{\cvJobDetailDescSpacing}%
   {\fontsize{9}{13}\selectfont
@@ -690,20 +703,24 @@
       leftmargin=*, labelsep=0.4em, nosep, itemsep=1.5pt,
       label={\color{highlight}\raisebox{0.5ex}{\HideFromText{\scalebox{0.25}{\faCircle}}}}
     ]
-      #5
+      #6
     \end{itemize}
   }%
-  \ifstrempty{#5}{\cvwarn{\string\cvJobDetail has an empty bullet list for '#1'.}}{}%
-  \ifstrequal{#6}{}{%
+  \ifstrempty{#6}{\cvwarn{Detail block has an empty bullet list for '#1'.}}{}%
+  \ifstrequal{#7}{}{%
   % No tags: smaller spacing after the block
   \par\vspace{\cvJobDetailEmptySpacing}%
 }{%
   % Tags present: tag spacing, then tags, then general spacing
   \par\vspace{\cvJobDetailTagSpacing}%
-  {\raggedright\linespread{1.3}\selectfont\noindent\ignorespaces #6\par}%
+  {\raggedright\linespread{1.3}\selectfont\noindent\ignorespaces #7\par}%
   \par\vspace{\cvJobDetailGeneralSpacing}%
 }%
 }%
+
+\newcommand{\cvJobDetailBuilder}[6]{%
+  \cvDetailBuilder{#1}{#2}{#3}{\faMapMarker*}{#4}{#5}{#6}%
+}
 
 
 \NewDocumentCommand{\cvJobDetail}{ m m m m +m O{}}{%
@@ -712,6 +729,15 @@
   \cvAssertNonEmpty{#3}{\string\cvJobDetail date is empty}{Provide a non-empty date value.}%
   \cvAssertNonEmpty{#4}{\string\cvJobDetail location is empty}{Provide a non-empty location value.}%
   \cvJobDetailBuilder{#1}{#2}{#3}{#4}{#5}{#6}%
+}
+
+% Portfolio / project detail (full-width pages). Meta (#4) is free-form text;
+% icons embedded in meta are not yet ATS-hardened (polish pass later).
+\NewDocumentCommand{\cvExpDetail}{ m m m m +m O{}}{%
+  \cvAssertNonEmpty{#1}{\string\cvExpDetail context is empty}{Provide a non-empty context/category value.}%
+  \cvAssertNonEmpty{#2}{\string\cvExpDetail title is empty}{Provide a non-empty title value.}%
+  \cvAssertNonEmpty{#3}{\string\cvExpDetail date is empty}{Provide a non-empty date value.}%
+  \cvDetailBuilder{#1}{#2}{#3}{}{#4}{#5}{#6}%
 }
 
 
