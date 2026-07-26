@@ -5,8 +5,8 @@
 % Modular two-column CV class for XeLaTeX.
 %
 % Provides: Document class with options (singlesided|doublesided, debug).
-% Loads: shared_adjustment.cls -> defaults_cv.cls -> i18n_cv.cls ->
-%        ats_cv.cls -> layout_cv.cls -> components_cv.cls
+% Loads: adjustment.cls -> ats.cls -> defaults_cv.cls -> i18n_cv.cls ->
+%        layout_cv.cls -> components_cv.cls
 % Used by: Lebenslauf.tex (via \documentclass{main_cv})
 %===============================================================================
 
@@ -144,7 +144,7 @@
 \newcommand{\cvSharedPath}{../../common/cls/shared_cls/}
 
 %%% ----- Execution -----
-\debug{Starting module load sequence: shared_adjustment -> defaults_cv -> i18n_cv -> ats_cv -> layout_cv -> components_cv}
+\debug{Starting module load sequence: adjustment -> ats -> defaults_cv -> i18n_cv -> layout_cv -> components_cv}
 \cvLoadModule{adjustment}
 \cvLoadModule{ats}
 \cvLoadModule{defaults_cv}

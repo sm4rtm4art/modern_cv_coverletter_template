@@ -1,18 +1,22 @@
 # Modern CV & Cover Letter — LaTeX Template
 
-A modular, bilingual CV and cover-letter system for XeLaTeX.
-Designed for maintainability, ATS compatibility, and GitHub/Overleaf publication.
+A modular, bilingual (DE/EN) CV and cover-letter system for XeLaTeX.
+Built for maintainability and Applicant Tracking Systems (ATS): shared design
+tokens, AccSupp/`ActualText` for clean text extraction, and optional 1–3 page
+layouts (overview, detail, full-width portfolio). Templates compile with
+`latexmk` (aux in `build/`), ship with TeXStudio magic comments, and stay
+public-safe via placeholders plus a PII guard for GitHub publication.
 
 ## Preview
 
-> Preview images are generated automatically by CI after each push to `main`.
+> CI writes **all pages** as PNGs under [`docs/previews/`](docs/previews/). The README shows page 1 only; open that folder for pages 2–3 (e.g. `cv_de-2.png`, `cv_de-3.png`).
 
-| German CV | German Cover Letter |
-|:---------:|:-------------------:|
+| German CV (Page 1) | German Cover Letter |
+|:--------------:|:-------------------:|
 | ![CV DE](docs/previews/cv_de-1.png) | ![CL DE](docs/previews/cover_letter_de-1.png) |
 
-| English CV | English Cover Letter |
-|:----------:|:--------------------:|
+| English CV (Page1) | English Cover Letter |
+|:---------------:|:--------------------:|
 | ![CV EN](docs/previews/cv_en-1.png) | ![CL EN](docs/previews/cover_letter_en-1.png) |
 
 ## Why this project
@@ -20,7 +24,7 @@ Designed for maintainability, ATS compatibility, and GitHub/Overleaf publication
 - **Modular architecture**: CV logic is split into focused class modules instead of a monolithic `.cls`.
 - **Unified design tokens**: Fonts, colors, and logging shared between CV and cover letter via `adjustment.cls`.
 - **Bilingual templates**: Ready-to-use German and English starter templates.
-- **ATS support**: Date normalization and `ActualText` accessibility for Applicant Tracking Systems.
+- **ATS support**: Date normalization and `ActualText` for Applicant Tracking Systems.
 - **GitHub-ready**: Public-safe placeholders, PII guard, and CI/CD pipeline.
 
 ## Repository structure
@@ -28,41 +32,23 @@ Designed for maintainability, ATS compatibility, and GitHub/Overleaf publication
 ```text
 modern_cv/
 ├── common/cls/
-│   ├── shared_cls/
-│   │   ├── adjustment.cls          # Fonts, colors, logging (shared)
-│   │   └── ats.cls                 # ATS accessibility & date normalization
-│   ├── cv/
-│   │   ├── main_cv.cls             # CV document class
-│   │   ├── defaults_cv.cls         # CV geometry and spacing
-│   │   ├── i18n_cv.cls             # Localized labels (de/en)
-│   │   ├── layout_cv.cls           # Page layers, footer, body layout
-│   │   └── components_cv.cls       # Header, sections, entries, skill bars
-│   └── cover_letter/
-│       ├── main_cover_letter.cls   # Cover letter document class
-│       └── defaults_coverletter.cls # Cover letter geometry and locale
+│   ├── shared_cls/          # Fonts, colors, logging, ATS (adjustment.cls, ats.cls)
+│   ├── cv/                  # main_cv, layout, components, i18n, defaults
+│   └── cover_letter/        # Cover letter document class + defaults
 ├── applications/
-│   ├── _template_de/
-│   │   ├── MOCK_Lebenslauf.tex
-│   │   └── MOCK_Bewerbungsanschreiben.tex
-│   └── _template_en/
-│       ├── MOCK_curriculum_vitae.tex
-│       └── MOCK_cover_letter.tex
-├── images/                          # Photo placeholder
-├── scripts/
-│   ├── new_application.sh           # Create new application from template
-│   └── pii_guard.sh                 # PII leak scanner
-├── docs/previews/                   # Auto-generated PDF preview images
-├── .github/workflows/ci.yml        # GitHub Actions CI
-├── .pre-commit-config.yaml          # Pre-commit hooks
-└── .chktexrc                        # chktex configuration
+│   ├── _template_de/        # MOCK Lebenslauf + Anschreiben
+│   └── _template_en/        # MOCK CV + cover letter
+├── images/                  # Photo placeholder
+├── scripts/                 # new_application.sh, pii_guard.sh
+├── docs/previews/           # Auto-generated PDF preview images
+└── .github/workflows/       # CI
 ```
 
 ## Requirements
 
 - TeX distribution with `xelatex` (TeX Live 2024+ / MacTeX recommended)
-- **Fonts**: SF Pro Text & SF Pro Display (macOS default, or install from Apple)
-  - Fallback: TeX Gyre Heros (bundled with TeX Live) — used automatically if SF Pro is unavailable
-- Font Awesome 5 package (via TeX distribution)
+- **Fonts**: SF Pro Text & SF Pro Display (macOS default), or TeX Gyre Heros as automatic fallback
+- Font Awesome 5 (via TeX distribution)
 - Shell environment for scripts (macOS/Linux)
 
 ## Quick start
@@ -72,242 +58,109 @@ modern_cv/
    bash scripts/new_application.sh "Company" "Role_ID1234" de
    ```
 2. Edit the `.tex` files in `applications/Company/Role_ID1234/`.
-3. Compile with XeLaTeX (run twice for correct page references):
+3. Compile with latexmk (XeLaTeX; usually two passes for page refs):
    ```bash
-   xelatex MOCK_Lebenslauf.tex && xelatex MOCK_Lebenslauf.tex
+   latexmk MOCK_Lebenslauf.tex
    ```
+   Aux files go to `./build/`; the PDF and `.synctex.gz` stay next to the `.tex`.
 4. Place final PDFs in the `sendouts/` folder.
 
 ## Customization
 
 ### Colors
 
-All colors are defined in `adjustment.cls` and can be overridden in your `.tex` file:
+Override accents in your `.tex` (defaults live in `adjustment.cls`):
 
 ```latex
-% Main accent color (tags, skill bars, section dividers)
-\definecolor{highlight}{HTML}{0055FF}
-
-% Optional overrides:
-%\colorlet{accent}{highlight}       % Entry titles (default: black)
-%\colorlet{heading}{black}          % Section headings
-%\colorlet{body}{black}             % Body text
-%\colorlet{headerbarcolor}{black}   % CV header background
-%\colorlet{headerfontcolor}{white}  % CV header text
-%\colorlet{highlightbarcolor}{palegray} % CV sidebar background
+\definecolor{highlight}{HTML}{0055FF}   % tags, skill bars, section dividers
+%\colorlet{accent}{highlight}
+%\colorlet{headerbarcolor}{black}
+%\colorlet{headerfontcolor}{white}
+%\colorlet{highlightbarcolor}{palegray}
 ```
 
-**Color palette reference:**
-
-| Name                | Default    | Purpose                           |
-| ------------------- | ---------- | --------------------------------- |
-| `highlight`         | `#2e457e`  | Main accent: tags, bars, dividers |
-| `accent`            | `black`    | Entry titles, bold headings       |
-| `heading`           | `black`    | Section heading text              |
-| `body`              | `black`    | Main body text                    |
-| `headerbarcolor`    | `black`    | CV header background              |
-| `headerfontcolor`   | `white`    | CV header text                    |
-| `highlightbarcolor` | `palegray` | CV sidebar background             |
+| Name | Purpose |
+| ---- | ------- |
+| `highlight` | Main accent: tags, bars, dividers |
+| `accent` / `heading` / `body` | Entry titles, section heads, body text |
+| `headerbarcolor` / `headerfontcolor` | CV header |
+| `highlightbarcolor` | Sidebar background |
 
 ### Fonts
 
-Fonts are configured in `adjustment.cls`:
-
-- **Primary**: SF Pro Text (body), SF Pro Display (headings)
-- **Fallback**: TeX Gyre Heros (auto-detected if SF Pro is missing)
-
-A warning is logged when falling back: `[CV-WARN] SF Pro Text not found — using TeX Gyre Heros fallback.`
+Configured in `adjustment.cls`: SF Pro Text (body) and SF Pro Display (headings), with TeX Gyre Heros if SF Pro is missing. A `[CV-WARN]` is logged on fallback.
 
 ### Footer
-
-**CV footer** (configured in `.tex`):
 
 ```latex
 \makecvfooter
   {\today}                          % Left: date (all pages)
-  {Tabellarischer Lebenslauf}       % Center: page 1 label
-  {Detaillierte Arbeitserfahrung}   % Center: page 2 label
-  {Projekte \& Portfolio}           % Center: page 3+ (mainonly) label
+  {Tabellarischer Lebenslauf}       % Center: page 1
+  {Detaillierte Arbeitserfahrung}   % Center: page 2
+  {Projekte \& Portfolio}           % Center: page 3+ (\fullbar / mainonly)
   % optional: [Dr. Max Mustermann]  % Right on single-page CVs; else \prefix+\name
 ```
 
-Right field: name on 1-page CVs, otherwise `Seite n von N` / `Page n of N`.
+On multi-page CVs the right field shows `Seite n von N` / `Page n of N`.
 
-### Full-width page 3 (portfolio)
+### CV pages
 
-Two-column pages use `\highlightbar` + `\mainbar`. For a full-width addendum:
+The MOCK CVs are built as up to three pages; drop trailing blocks if you need fewer:
 
-```latex
-\clearpage
-\pagestyle{mainonly}
-\thispagestyle{mainonly}
-\fullbar{
-  \section[\faProjectDiagram]{Selected Projects}
-  \cvExpDetail{Context 1}{Project Title 1}{01|2026\textendash Present}
-    [\faGithub]{exampleuser/project-1}
-    {\cvDetailItem{Optional:}{Short project description.}}
-    [{\cvJobTags{Tag 1, Tag 2}}]
-  \cvDivider
-  % ... more \cvExpDetail blocks ...
-}
-\makebody
-```
+| Page | Layout | Typical content |
+| ---: | ------ | --------------- |
+| 1 | Header + sidebar (`\highlightbar`) + main (`\mainbar`) | Overview / résumé |
+| 2 | Sidebar + main (`\pagestyle{highlightmain}`) | Detailed experience |
+| 3 | Full width (`\fullbar`, auto-`mainonly`) | Projects / portfolio (`\cvExpDetail`, `\cvDivider`) |
 
-- `\fullbar` — full-width body (no sidebar)
-- `\pagestyle{mainonly}` — footer uses label-page3 (no highlightbar layers)
-- `\cvExpDetail{context}{title}{date}[icon]{meta}{bullets}[tags]` — portfolio entry; put FA icons in `[icon]`, not in meta (icons are hidden from ATS)
-- `\cvDivider` — thin horizontal rule between entries
+Footer center labels come from `\makecvfooter` (one per page type). Details and examples live in the MOCK templates.
 
 ### Skill bars
 
-Two styles available (set in `.tex`):
-
 ```latex
-\cvUseSkillBarStyle{segmented}  % Default: segmented bars with fade
-\cvUseSkillBarStyle{classic}    % Simpler filled bars
+\cvUseSkillBarStyle{segmented}  % or classic
+\cvSkill{LaTeX}{5}              % tech skills (levels 1–5)
+\cvLang{German}{5}              % spoken languages (CEFR-oriented ATS labels)
 ```
 
-Tech skills use `\cvSkill{Name}{1-5}` with ATS labels:
-
-| Level | EN | DE |
-|------:|----|----|
-| 1 | Basic | Grundlagen |
-| 2 | Intermediate | Erweitert |
-| 3 | Advanced | Fortgeschritten |
-| 4 | Proficient | Vertieft |
-| 5 | Expert | Experte |
-
-Spoken languages use `\cvLang{Name}{1-5}` (CEFR-oriented ATS labels, same bars):
-
-| Level | EN | DE |
-|------:|----|----|
-| 1 | Basic (A1-A2) | Grundkenntnisse (A1-A2) |
-| 2 | Conversational (B1) | Konversationssicher (B1) |
-| 3 | Fluent (B2) | Fließend (B2) |
-| 4 | Business Fluent (C1) | Verhandlungssicher (C1) |
-| 5 | Native / Bilingual (C2) | Muttersprache / Zweisprachig (C2) |
+Level wording lives in `i18n_cv.cls` (tech vs language). Optional palette: `\cvSetSkillPalette{...}`.
 
 ### Address
 
-```latex
-% {street}{zip}{city}{country} — blank parts omitted; country optional
-\address{Hauptstraße 101}{D-12345}{Berlin}{Deutschland}
-% → visual: Hauptstraße 101, D-12345 Berlin, Deutschland
-% → ATS: Adresse: Straße: …, PLZ: …, Stadt: …, Land: …
+`\address{street}{zip}{city}{country}` — blank parts are omitted. ZIP and city are joined by a space (no comma). Country is optional. Examples: full line, or `\address{}{}{Berlin}{Deutschland}` for city + country only. Drop the `\address{...}` call inside `\tagline` if you want no address at all.
 
-\address{}{}{Berlin}{Deutschland}
-% → visual: Berlin, Deutschland
-% → ATS: Adresse: Stadt: Berlin, Land: Deutschland
-
-\address{Hauptstraße 101}{D-12345}{Berlin}{}   % no country
-```
-
-Omit `\address{...}` entirely inside `\tagline` if you want no address line.
-
-Custom skill-bar palette:
+### Language & ATS
 
 ```latex
-\cvSetSkillPalette
-  {highlight!10}    % Background
-  {highlight!60}    % Fill
-  {highlight!30}    % Full-bar tip
-  {highlight!15}    % Partial-bar tip
+\cvSetLanguage{de}                 % or en — footer/section labels
+\cvSetAtsDateMode{normalized}      % default; or raw
 ```
 
-### Language
+Compact dates (e.g. `12|25 \textendash Aktuell`) are exposed to ATS via `ActualText` in a normalized form. Skill/language levels and contact fields use the same accessibility layer so extractors see clean labels.
 
-```latex
-\cvSetLanguage{de}  % German labels (Seite, von, Datum, ...)
-\cvSetLanguage{en}  % English labels (Page, of, Date, ...)
-```
+## TeXStudio
 
-### ATS date formatting
-
-Dates entered in compact form (e.g. `12|25 \textendash Aktuell`) are automatically
-normalized for ATS parsers via `ActualText` (e.g. `12/2025 - 02/2026`).
-
-```latex
-\cvSetAtsDateMode{normalized}  % Default: machine-readable dates for ATS
-\cvSetAtsDateMode{raw}         % Keep authored date tokens as-is
-```
-
-## Overleaf
-
-1. Upload the entire repository to Overleaf.
-2. Set the compiler to **XeLaTeX** (Menu > Compiler).
-3. Set the desired `.tex` file as the main document.
-4. Note: SF Pro fonts are not available on Overleaf. The template will automatically use TeX Gyre Heros as a fallback.
-
-## TeXStudio tips
-
-Templates use **latexmk + XeLaTeX**. Magic comments at the top of each `.tex` file:
+Templates ship with:
 
 ```latex
 % !TeX program = xelatex
 % !TeX TXS-program:compile = txs:///latexmk
 ```
 
-Auxiliary files (`.aux`, `.log`, `.fls`, `.fdb_latexmk`, `.xdv`, …) go to `./build/` via `.latexmkrc`. The `.pdf` and `.synctex.gz` stay next to the `.tex` file.
+For error highlighting with `aux_dir=build`: Options → Configure TeXstudio → Build → Additional Search Paths → Log File → `./build`.
 
-**Errors in the TeXStudio UI:** TeXStudio reads the `.log` after compile. With `aux_dir=build`, point it at that folder once:
+Debug: add `debug` to the document class options.
 
-1. Options → Configure TeXstudio → Build
-2. Additional Search Paths → Log File → add `./build`
+## Overleaf
 
-Class messages (`[CV-INFO]`, `[CV-WARN]`, `[CV-ERROR]`, `[CV-DEBUG]`) still appear in the log; `\ClassWarning` / `\ClassError` feed the usual panels once the log path is found.
+Overleaf no longer accepts CV/résumé projects under their current policies. Prefer local TeX Live / TeXStudio (or another desktop TeX setup). If you still upload elsewhere, use **XeLaTeX**; SF Pro will fall back to TeX Gyre Heros.
 
-Debug mode: add `debug` to document class options for verbose output:
+## CI, privacy & scripts
 
-```latex
-\documentclass[debug, paper=a4]{../../common/cls/cv/main_cv}
-```
-
-## CI/CD
-
-### Pre-commit hooks
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-Hooks: trailing whitespace, end-of-file fixer, shellcheck, PII guard.
-
-### GitHub Actions
-
-The CI workflow (`.github/workflows/ci.yml`) runs on push/PR:
-
-- Compiles all 4 templates (DE + EN, CV + cover letter) with XeLaTeX
-- Converts first page of each PDF to PNG preview images
-- Commits preview images to `docs/previews/` on main
-- Runs chktex for LaTeX linting
-- Runs PII guard to catch leaked personal data
-- Runs shellcheck on scripts
-
-## Privacy and publishing
-
-- Templates use placeholder values by default (Mustermann, max\_mustermann@email.de, etc.).
-- The PII guard script (`scripts/pii_guard.sh`) scans for phone numbers, emails, and addresses.
-- Create a `.pii_blocklist` file (see `.pii_blocklist.example`) with your real personal strings.
-- Company-specific folders are ignored by `.gitignore`.
-- Template folders (`_template_de`, `_template_en`) stay tracked.
-
-## `new_application.sh`
-
-```bash
-# Create German application
-scripts/new_application.sh "ACME" "Data_Scientist_ID42" de
-
-# Create with slash syntax
-scripts/new_application.sh "ACME/Data_Scientist_ID42" de
-```
-
-Features:
-
-- Copies template files (excluding build artifacts and PDFs)
-- Initializes a local git repo for document version control
-- Creates a `sendouts/` folder for final PDFs
-- Adds a `.gitignore` for LaTeX build artifacts
+- **GitHub Actions**: compiles DE/EN templates, writes all-page preview PNGs to `docs/previews/`, runs chktex, PII guard, and shellcheck; commits previews on `main`.
+- **Pre-commit**: `pip install pre-commit && pre-commit install` (whitespace, shellcheck, PII).
+- **Privacy**: templates use placeholders; `scripts/pii_guard.sh` plus `.pii_blocklist` (see `.pii_blocklist.example`). Company application folders are gitignored; `_template_*` stay tracked.
+- **New application**: `scripts/new_application.sh "ACME" "Role_ID42" de` (or `"ACME/Role_ID42" de`) copies the template, inits a local git repo, and adds `sendouts/` + `.gitignore`.
 
 ## License
 
