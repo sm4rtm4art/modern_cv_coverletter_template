@@ -317,9 +317,14 @@
 %-------------------------------------------------------------------------------
 %  7. PERSONAL INFORMATION COMMANDS
 %-------------------------------------------------------------------------------
+% When a setter is used, its value must be non-empty (omit the command entirely
+% to hide that header row). \namePrefix and \position may stay empty/optional.
 
-% Name: \name{<firstname>}{<lastname>}
-\newcommand*{\name}[1]{\def\@name{#1}}
+% Name: \name{Max Mustermann}
+\newcommand*{\name}[1]{%
+  \cvAssertNonEmpty{#1}{\string\name{} is empty}{Provide a non-empty name.}%
+  \def\@name{#1}%
+}
 
 % Name prefix/title: \namePrefix{Dr.} (default: empty)
 \newcommand*{\namePrefix}[1]{\def\@namePrefix{#1}}
@@ -332,14 +337,24 @@
 }\def\@fullname{\fullname}
 
 
-% Contact info
-\newcommand*{\address}[1]{\def\@address{#1}}
-\newcommand*{\position}[1]{\def\@position{#1}}
-\newcommand*{\phone}[1]{\def\@phone{#1}}
-\newcommand*{\email}[1]{\def\@email{#1}}
+% Contact info (single-line address API — not the CV 4-part \address)
+\newcommand*{\address}[1]{%
+  \cvAssertNonEmpty{#1}{\string\address{} is empty}{Provide a non-empty address line, or omit \string\address.}%
+  \def\@address{#1}%
+}
+\newcommand*{\position}[1]{\def\@position{#1}}% optional subtitle under the name
+\newcommand*{\phone}[1]{%
+  \cvAssertNonEmpty{#1}{\string\phone{} is empty}{Provide a non-empty phone number, or omit \string\phone.}%
+  \def\@phone{#1}%
+}
+\newcommand*{\email}[1]{%
+  \cvAssertNonEmpty{#1}{\string\email{} is empty}{Provide a non-empty email address, or omit \string\email.}%
+  \def\@email{#1}%
+}
 
 
 \newcommand*{\github}[1]{%
+  \cvAssertNonEmpty{#1}{\string\github{} is empty}{Provide a username or URL, or omit \string\github.}%
   \def\@github{#1}%
   \IfBeginWith{#1}{http}{%
     \def\@githuburl{#1}%
@@ -352,6 +367,8 @@
 }
 % \linkedin{display-name}{url} — unified 2-arg API (same as CV).
 \newcommand*{\linkedin}[2]{%
+  \cvAssertNonEmpty{#1}{\string\linkedin{} label is empty}{Provide a non-empty display label.}%
+  \cvAssertNonEmpty{#2}{\string\linkedin{} URL/handle is empty}{Provide a URL or profile handle.}%
   \def\@linkedin{#1}%
   \IfBeginWith{#2}{http}{%
     \def\@linkedinurl{#2}%
@@ -370,6 +387,7 @@
 
 % Recipient info — optional color: \recipientCompany[highlight]
 \newcommand*{\recipientCompany}[2][]{%
+  \cvAssertNonEmpty{#2}{\string\recipientCompany{} is empty}{Provide a non-empty company name.}%
   \def\@recipientCompanyplain{#2}%
   \ifblank{#1}{%
     \def\@recipientCompany{#2}%
