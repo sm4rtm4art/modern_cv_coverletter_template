@@ -18,73 +18,28 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      # --- German templates ---
-      - name: Compile German CV (MOCK_Lebenslauf)
-        uses: xu-cheng/latex-action@v3
+      # latexmk + XeLaTeX via template .latexmkrc (aux → build/, PDF next to .tex)
+      - name: Compile German templates
+        uses: xu-cheng/latex-action@v4
         with:
           working_directory: applications/_template_de
-          root_file: MOCK_Lebenslauf.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
+          root_file: |
+            MOCK_Lebenslauf.tex
+            MOCK_Bewerbungsanschreiben.tex
+          latexmk_use_xelatex: true
+          args: -interaction=nonstopmode -file-line-error
 
-      - name: Compile German CV (second pass for cross-refs)
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: applications/_template_de
-          root_file: MOCK_Lebenslauf.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
-
-      - name: Compile German Cover Letter (MOCK_Bewerbungsanschreiben)
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: applications/_template_de
-          root_file: MOCK_Bewerbungsanschreiben.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
-
-      - name: Compile German Cover Letter (second pass)
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: applications/_template_de
-          root_file: MOCK_Bewerbungsanschreiben.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
-
-      # --- English templates ---
-      - name: Compile English CV (MOCK_curriculum_vitae)
-        uses: xu-cheng/latex-action@v3
+      - name: Compile English templates
+        uses: xu-cheng/latex-action@v4
         with:
           working_directory: applications/_template_en
-          root_file: MOCK_curriculum_vitae.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
-
-      - name: Compile English CV (second pass)
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: applications/_template_en
-          root_file: MOCK_curriculum_vitae.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
-
-      - name: Compile English Cover Letter (MOCK_cover_letter)
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: applications/_template_en
-          root_file: MOCK_cover_letter.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
-
-      - name: Compile English Cover Letter (second pass)
-        uses: xu-cheng/latex-action@v3
-        with:
-          working_directory: applications/_template_en
-          root_file: MOCK_cover_letter.tex
-          compiler: xelatex
-          args: -interaction=nonstopmode -halt-on-error
+          root_file: |
+            MOCK_curriculum_vitae.tex
+            MOCK_cover_letter.tex
+          latexmk_use_xelatex: true
+          args: -interaction=nonstopmode -file-line-error
 
       # --- Convert first page of each PDF to PNG for README ---
       - name: Convert PDFs to preview images
@@ -129,7 +84,7 @@ jobs:
           fi
 
       - name: Upload compiled PDFs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: compiled-pdfs
           path: |
@@ -144,7 +99,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install chktex
         run: sudo apt-get update && sudo apt-get install -y chktex
@@ -179,7 +134,7 @@ jobs:
   #   needs: [compile, lint]
   #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v6
   #       with:
   #         fetch-depth: 0
   #

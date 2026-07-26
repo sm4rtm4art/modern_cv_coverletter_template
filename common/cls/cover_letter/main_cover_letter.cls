@@ -166,6 +166,7 @@
 %%% ----- Execution -----
 \debug{Starting module load sequence: TEMP_defaults_coverletter,shared_adjustment}
 \coverletterLoadAllModules{defaults_coverletter,adjustment,ats}
+\makeatletter % restore after modules that may have changed @ catcode
 \debug{Completed module load sequence}
 
 
@@ -446,7 +447,7 @@
 \newcommand{\drawSocialItem}[3]{%
 \mbox{% Keeps the icon and text on the same line (no breaks)
   \href{#1}{%
-    \headerIconBox{\HideFromText#2}%
+    \headerIconBox{\HideFromText{#2}}%
     \hspace{\headerIconhSpacing}%
     %
     % Render the actual text label
@@ -467,12 +468,7 @@
 }
 
 \newcommand{\buildPosition}[1]{%
-  \mbox{
-    \ifthenelse{
-      \isundefined{\@position}}{}{%
-    {#1}
-  }%
-  }%
+  \mbox{#1}%
 }
 
 \newlength{\headerNameLineHeight}
@@ -506,7 +502,7 @@
 		\hspace{0.5em}%
     \headerIconBox{\faMapMarker*}%
 			\hspace{\headerAddressIconSpacing}%
-		  {\headerAddressStyle\@address}%
+		  {\headerAddressStyle{\@address}}%
       \par\nointerlineskip\vspace{\headerLineSpace}%
 		}%
 	\end{minipage}%

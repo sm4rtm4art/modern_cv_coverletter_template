@@ -29,14 +29,17 @@
   % Default accsupp wraps BDC/EMC in coordinate-transformation q/Q pairs,
   % which grossly offsets the ActualText box. Using pdf:code emits BDC/EMC
   % directly into the content stream (like pdfTeX's \pdfliteral direct).
+  % Use a group so \makeatletter does not leak \makeatother into callers that
+  % \input this file (cover letter / CV module loaders).
+  \begingroup
   \makeatletter
-  \def\ACCSUPP@bdc{%
+  \gdef\ACCSUPP@bdc{%
     \special{pdf:code \ACCSUPP@span BDC}%
   }%
-  \def\ACCSUPP@emc{%
+  \gdef\ACCSUPP@emc{%
     \special{pdf:code EMC}%
   }%
-  \makeatother
+  \endgroup
 }{%
   \cvwarn{Optional package 'accsupp' not found. ATS ActualText support may be reduced.}%
 }
