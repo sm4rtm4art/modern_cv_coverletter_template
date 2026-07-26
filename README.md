@@ -9,7 +9,7 @@ public-safe via placeholders plus a PII guard for GitHub publication.
 
 ## Preview
 
-> CI writes **all pages** as PNGs under [`docs/previews/`](docs/previews/). The README shows page 1 only; open that folder for pages 2–3 (e.g. `cv_de-2.png`, `cv_de-3.png`).
+> Preview PNGs live under [`docs/previews/`](docs/previews/) (all pages). The README shows page 1 only — open that folder for pages 2–3 (e.g. `cv_de-2.png`, `cv_de-3.png`). Regenerate locally or from the CI `preview-pngs` artifact when MOCK layouts change.
 
 | German CV (Page 1) | German Cover Letter |
 |:--------------:|:-------------------:|
@@ -157,7 +157,7 @@ Overleaf no longer accepts CV/résumé projects under their current policies. Pr
 
 ## CI, privacy & scripts
 
-- **GitHub Actions**: compiles DE/EN templates, writes all-page preview PNGs to `docs/previews/`, runs chktex, PII guard, and shellcheck; commits previews on `main`.
+- **GitHub Actions**: compiles DE/EN templates, uploads PDFs and all-page preview PNGs as artifacts, runs chktex, PII guard, and shellcheck. Refresh `docs/previews/` in a PR when MOCK layouts change (CI does not push to `main`).
 - **Pre-commit**: `pip install pre-commit && pre-commit install` (whitespace, shellcheck, PII).
 - **Privacy**: templates use placeholders; `scripts/pii_guard.sh` plus `.pii_blocklist` (see `.pii_blocklist.example`). Company application folders are gitignored; `_template_*` stay tracked.
 - **New application**: `scripts/new_application.sh "ACME" "Role_ID42" de` (or `"ACME/Role_ID42" de`) copies the template, inits a local git repo, and adds `sendouts/` + `.gitignore`.

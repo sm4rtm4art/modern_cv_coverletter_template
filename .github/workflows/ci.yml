@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
 
-# Default: read-only for all jobs (least privilege).
+# Default: read-only (least privilege). No job pushes to main.
 permissions:
   contents: read
 
@@ -14,9 +14,6 @@ jobs:
   compile:
     name: Compile LaTeX documents
     runs-on: ubuntu-latest
-    # Only the compile job on main push needs write access (preview commit).
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v6
 
@@ -59,29 +56,13 @@ jobs:
             "applications/_template_en/MOCK_cover_letter.pdf" \
             docs/previews/cover_letter_en
 
-      # --- Remove tracked build artifacts and commit changes (main only) ---
-      - name: Clean artifacts and commit previews
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Remove any tracked build artifacts that .gitignore should exclude
-          git ls-files -- '*.aux' '*.log' '*.fls' '*.fdb_latexmk' '*.xdv' \
-            '*.synctex.gz' '*.out' '*.toc' '*.bbl' '*.blg' '*.bcf' \
-            '*.run.xml' '*.txt' 'texput.*' \
-            | xargs -r git rm --cached --ignore-unmatch
-
-          # Stage preview images
-          git add docs/previews/*.png
-
-          # Commit only if there are staged changes
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "ci: update preview images and clean build artifacts"
-            git push
-          fi
+      # Previews are committed in PRs (Linux CI fonts may differ from local).
+      # Do not push to main here — branch protection requires "Lint & PII check".
+      - name: Upload preview PNGs
+        uses: actions/upload-artifact@v6
+        with:
+          name: preview-pngs
+          path: docs/previews/*.png
 
       - name: Upload compiled PDFs
         uses: actions/upload-artifact@v6
