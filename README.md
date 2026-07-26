@@ -144,7 +144,7 @@ Two-column pages use `\highlightbar` + `\mainbar`. For a full-width addendum:
 \fullbar{
   \section[\faProjectDiagram]{Selected Projects}
   \cvExpDetail{Context 1}{Project Title 1}{01|2026\textendash Present}
-    {\faGithub \hspace{0.35em} exampleuser/project-1}
+    [\faGithub]{exampleuser/project-1}
     {\cvDetailItem{Optional:}{Short project description.}}
     [{\cvJobTags{Tag 1, Tag 2}}]
   \cvDivider
@@ -155,7 +155,7 @@ Two-column pages use `\highlightbar` + `\mainbar`. For a full-width addendum:
 
 - `\fullbar` — full-width body (no sidebar)
 - `\pagestyle{mainonly}` — footer uses label-page3 (no highlightbar layers)
-- `\cvExpDetail` — portfolio/project entry (same bullet/tag style as `\cvJobDetail`)
+- `\cvExpDetail{context}{title}{date}[icon]{meta}{bullets}[tags]` — portfolio entry; put FA icons in `[icon]`, not in meta (icons are hidden from ATS)
 - `\cvDivider` — thin horizontal rule between entries
 
 ### Skill bars

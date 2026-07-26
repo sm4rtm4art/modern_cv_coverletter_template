@@ -698,15 +698,18 @@
     }%
   }%
   \par\vspace{\cvJobDetailDescSpacing}%
-  {\fontsize{9}{13}\selectfont
-    \begin{itemize}[
-      leftmargin=*, labelsep=0.4em, nosep, itemsep=1.5pt,
-      label={\color{highlight}\raisebox{0.5ex}{\HideFromText{\scalebox{0.25}{\faCircle}}}}
-    ]
-      #6
-    \end{itemize}
+  \ifstrempty{#6}{%
+    \cvwarn{Detail block has an empty bullet list for '#1'.}%
+  }{%
+    {\fontsize{9}{13}\selectfont
+      \begin{itemize}[
+        leftmargin=*, labelsep=0.4em, nosep, itemsep=1.5pt,
+        label={\color{highlight}\raisebox{0.5ex}{\HideFromText{\scalebox{0.25}{\faCircle}}}}
+      ]
+        #6
+      \end{itemize}
+    }%
   }%
-  \ifstrempty{#6}{\cvwarn{Detail block has an empty bullet list for '#1'.}}{}%
   \ifstrequal{#7}{}{%
   % No tags: smaller spacing after the block
   \par\vspace{\cvJobDetailEmptySpacing}%
@@ -731,13 +734,15 @@
   \cvJobDetailBuilder{#1}{#2}{#3}{#4}{#5}{#6}%
 }
 
-% Portfolio / project detail (full-width pages). Meta (#4) is free-form text;
-% icons embedded in meta are not yet ATS-hardened (polish pass later).
-\NewDocumentCommand{\cvExpDetail}{ m m m m +m O{}}{%
+% Portfolio / project detail (full-width pages).
+% \cvExpDetail{context}{title}{date}[icon]{meta}{bullets}[tags]
+%   icon — optional FA glyph (hidden from ATS via \HideFromText)
+%   meta — plain text / URL / repo path (no icons here)
+\NewDocumentCommand{\cvExpDetail}{ m m m O{} m +m O{}}{%
   \cvAssertNonEmpty{#1}{\string\cvExpDetail context is empty}{Provide a non-empty context/category value.}%
   \cvAssertNonEmpty{#2}{\string\cvExpDetail title is empty}{Provide a non-empty title value.}%
   \cvAssertNonEmpty{#3}{\string\cvExpDetail date is empty}{Provide a non-empty date value.}%
-  \cvDetailBuilder{#1}{#2}{#3}{}{#4}{#5}{#6}%
+  \cvDetailBuilder{#1}{#2}{#3}{#4}{#5}{#6}{#7}%
 }
 
 
