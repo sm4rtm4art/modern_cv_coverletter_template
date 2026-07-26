@@ -47,8 +47,10 @@
 \newcommand{\cvinfo}[1]{\typeout{[CV-INFO] #1}}
 \newcommand{\debug}[1]{\ifdebugMode\typeout{[CV-DEBUG] #1}\fi}
 \let\cvdebug\debug
-\newcommand{\cvwarn}[1]{\ClassWarning{main_cv}{#1}}
-\newcommand{\cverror}[2]{\ClassError{main_cv}{#1}{#2}}
+% Class id matches shared_adjustment.cls fallback (`modern-cv`) for consistent
+% TeXStudio / log panels across CV + shared modules.
+\newcommand{\cvwarn}[1]{\ClassWarning{modern-cv}{#1}}
+\newcommand{\cverror}[2]{\ClassError{modern-cv}{#1}{#2}}
 \newcommand{\debugmeaning}[2]{\debug{#1 = \meaning#2}}
 \let\debugtok\debugmeaning
 
@@ -106,7 +108,7 @@
 %===============================================================================
 
 
-% 2.Loading logica (Cascade: Lokal -> Module -> Shared -> Error)
+% 2. Loading logic (cascade: local → module → shared → error)
 \newcommand{\cvLoadModule}[1]{%
   \debug{Module load requested: #1.cls}%
   % Step A: Searched in the local folder of the tex file

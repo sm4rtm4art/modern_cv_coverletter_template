@@ -79,8 +79,11 @@
 %===============================================================================
 
 % --- Name / prefix ---
-\newcommand{\name}[1]{\def\cvName{#1}}
-\newcommand{\prefix}[1]{\def\cvPrefix{#1}}
+\newcommand{\name}[1]{%
+  \cvAssertNonEmpty{#1}{\string\name{} is empty}{Provide a non-empty name.}%
+  \def\cvName{#1}%
+}
+\newcommand{\prefix}[1]{\def\cvPrefix{#1}}% optional (Dr., …)
 
 % Computed on demand — no caching needed.
 \newcommand{\cvFullNamePlain}{\ifblank{\cvPrefix}{}{\cvPrefix\space}\cvName}
@@ -101,8 +104,12 @@
   \ifblank{#1}{\def\cvPhotoFormat{circle}}{\def\cvPhotoFormat{#1}}%
 }
 
-% --- Address (3 required + 1 optional country) ---
+% --- Address {street}{zip}{city}{country?} ---
+% Street/zip/country may be blank (omit-empty formatting); city is required
+% when \address is used. Omit the whole \address call for no address line.
 \NewDocumentCommand{\address}{m m m g}{%
+  \cvAssertNonEmpty{#3}{\string\address{} city is empty}{%
+    Provide a city, or omit \string\address{} entirely. Street/ZIP/country may be blank.}%
   \def\cvAddressStreet{#1}%
   \def\cvAddressZip{#2}%
   \def\cvAddressCity{#3}%
@@ -112,6 +119,8 @@
 
 % --- Phone (prefix + number) ---
 \NewDocumentCommand{\phone}{m m}{%
+  \cvAssertNonEmpty{#1}{\string\phone{} prefix is empty}{Provide a non-empty country/area prefix.}%
+  \cvAssertNonEmpty{#2}{\string\phone{} number is empty}{Provide a non-empty phone number.}%
   \def\cvPhonePrefix{#1}%
   \def\cvPhoneNumber{#2}%
   \cvHasPhonetrue
@@ -121,6 +130,7 @@
 % Store both the LaTeX-formatted and plain-text versions.
 % Plain version replaces \_ with _ for clean ATS extraction.
 \newcommand{\email}[1]{%
+  \cvAssertNonEmpty{#1}{\string\email{} is empty}{Provide a non-empty email address.}%
   \def\cvEmail{#1}%
   \StrSubstitute{#1}{\_}{_}[\cvTmpPlain]%
   \edef\cvEmailPlain{\cvTmpPlain}%
@@ -129,6 +139,8 @@
 
 % --- GitHub (label + URL, with auto-resolution) ---
 \newcommand{\github}[2]{%
+  \cvAssertNonEmpty{#1}{\string\github{} label is empty}{Provide a non-empty display label.}%
+  \cvAssertNonEmpty{#2}{\string\github{} handle/URL is empty}{Provide a username, path, or URL.}%
   \def\cvGitHubLabel{#1}%
   \IfBeginWith{#2}{http}{%
     \def\cvGitHubUrl{#2}%
@@ -144,6 +156,8 @@
 
 % --- LinkedIn (label + URL, with auto-resolution) ---
 \newcommand{\linkedin}[2]{%
+  \cvAssertNonEmpty{#1}{\string\linkedin{} label is empty}{Provide a non-empty display label.}%
+  \cvAssertNonEmpty{#2}{\string\linkedin{} handle/URL is empty}{Provide a username, path, or URL.}%
   \def\cvLinkedInLabel{#1}%
   \IfBeginWith{#2}{http}{%
     \def\cvLinkedInUrl{#2}%
@@ -776,6 +790,7 @@
   \cvAssertNonEmpty{#1}{\string\cvExpDetail context is empty}{Provide a non-empty context/category value.}%
   \cvAssertNonEmpty{#2}{\string\cvExpDetail title is empty}{Provide a non-empty title value.}%
   \cvAssertNonEmpty{#3}{\string\cvExpDetail date is empty}{Provide a non-empty date value.}%
+  \cvAssertNonEmpty{#5}{\string\cvExpDetail meta is empty}{Provide meta text (e.g. repo path) or a placeholder; put FA icons in [icon].}%
   \cvDetailBuilder{#1}{#2}{#3}{#4}{#5}{#6}{#7}%
 }
 

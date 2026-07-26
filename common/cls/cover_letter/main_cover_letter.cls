@@ -167,6 +167,9 @@
 \debug{Starting module load sequence: TEMP_defaults_coverletter,shared_adjustment}
 \coverletterLoadAllModules{defaults_coverletter,adjustment,ats}
 \makeatletter % restore after modules that may have changed @ catcode
+% Route shared \cvwarn/\cverror (used by ats.cls) through cover-letter panels.
+\let\cvwarn\coverLetterWarn
+\renewcommand{\cverror}[2]{\coverLetterError{#1}{#2}}%
 \debug{Completed module load sequence}
 
 
