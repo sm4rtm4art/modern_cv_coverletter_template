@@ -41,21 +41,21 @@ jobs:
           latexmk_use_xelatex: true
           args: -interaction=nonstopmode -file-line-error
 
-      # --- Convert first page of each PDF to PNG for README ---
+      # --- Convert all PDF pages to PNG (README shows p1; rest in docs/previews/) ---
       - name: Convert PDFs to preview images
         run: |
           sudo apt-get update && sudo apt-get install -y poppler-utils
           mkdir -p docs/previews
-          pdftoppm -png -r 200 -f 1 -l 1 \
+          pdftoppm -png -r 200 \
             "applications/_template_de/MOCK_Lebenslauf.pdf" \
             docs/previews/cv_de
-          pdftoppm -png -r 200 -f 1 -l 1 \
+          pdftoppm -png -r 200 \
             "applications/_template_de/MOCK_Bewerbungsanschreiben.pdf" \
             docs/previews/cover_letter_de
-          pdftoppm -png -r 200 -f 1 -l 1 \
+          pdftoppm -png -r 200 \
             "applications/_template_en/MOCK_curriculum_vitae.pdf" \
             docs/previews/cv_en
-          pdftoppm -png -r 200 -f 1 -l 1 \
+          pdftoppm -png -r 200 \
             "applications/_template_en/MOCK_cover_letter.pdf" \
             docs/previews/cover_letter_en
 

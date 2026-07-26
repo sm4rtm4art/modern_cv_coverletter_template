@@ -86,10 +86,13 @@
   }%
 }
 
-% Capture full-width content for pages without a highlightbar.
-% Templates should set \pagestyle{mainonly} / \thispagestyle{mainonly} for these pages.
+% Capture full-width content for pages without a highlightbar (typically page 3+).
+% Automatically switches to mainonly (label-page3 footer, no highlightbar layers).
+% Call after \clearpage. Override with \pagestyle{...} after \fullbar if needed.
 \newcommand{\fullbar}[1]{%
   \cvFullWidthBodytrue
+  \pagestyle{mainonly}%
+  \thispagestyle{mainonly}%
   \def\cvHighlightbarContent{}%
   \def\cvMainbarContent{%
     \begin{minipage}[t]{\textwidth}%
