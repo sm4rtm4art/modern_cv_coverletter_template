@@ -19,7 +19,7 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 \usepackage{lipsum}
 
 % Skill bar renderer: classic | segmented
-\cvUseSkillBarStyle{classic}
+\cvUseSkillBarStyle{segmented}
 
 
 
@@ -58,7 +58,7 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 % \makecvfooter{date}{label-page1}{label-page2}{label-page3}[name]
 %   Single page: L=date, C=label1, R=name (optional [name], else \prefix+\name)
 %   Multi-page:  L=date, C=label1/label2/label3, R=Page n of N
-%   label-page3 is used on \pagestyle{mainonly} full-width pages
+%   label-page3 is used on full-width pages (\fullbar sets mainonly)
 \makecvfooter
   {\today}
   {Curriculum Vitae}
@@ -349,10 +349,9 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 
 %===============================================================================
 % PAGE 3 — FULL-WIDTH PORTFOLIO (no highlightbar)
+% \fullbar sets \pagestyle{mainonly} (label-page3 footer). Omit this block for a 2-page CV.
 %===============================================================================
 
-\pagestyle{mainonly}
-\thispagestyle{mainonly}
 \fullbar{
 
 	\section[\faProjectDiagram]{Selected Projects \& Open Source}
