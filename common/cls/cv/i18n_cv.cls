@@ -31,6 +31,7 @@
     \def\cvLabelAds{ADS: }%
     \def\cvPageWord{Page}%
     \def\cvOfWord{of}%
+    \def\cvPresentWord{Present}%
     \def\cvSkillLevelI{Basic}%
     \def\cvSkillLevelII{Intermediate}%
     \def\cvSkillLevelIII{Advanced}%
@@ -63,6 +64,7 @@
     \def\cvLabelAds{ADS: }%
     \def\cvPageWord{Seite}%
     \def\cvOfWord{von}%
+    \def\cvPresentWord{Aktuell}%
     \def\cvSkillLevelI{Grundlagen}%
     \def\cvSkillLevelII{Erweitert}%
     \def\cvSkillLevelIII{Fortgeschritten}%

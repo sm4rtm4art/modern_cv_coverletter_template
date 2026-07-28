@@ -106,6 +106,31 @@ jobs:
         run: |
           shellcheck -x scripts/*.sh
 
+  scaffold:
+    name: Scaffold smoke (new_application.sh)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create DE application from template
+        run: |
+          bash scripts/new_application.sh "ZZCI_TestCorp" "Role_ID9999" de
+
+      - name: Compile scaffolded CV + cover letter
+        uses: xu-cheng/latex-action@v4
+        with:
+          working_directory: applications/ZZCI_TestCorp/Role_ID9999
+          root_file: |
+            MOCK_Lebenslauf.tex
+            MOCK_Bewerbungsanschreiben.tex
+          latexmk_use_xelatex: true
+          args: -interaction=nonstopmode -file-line-error
+
+      - name: Assert PDFs exist
+        run: |
+          test -s applications/ZZCI_TestCorp/Role_ID9999/MOCK_Lebenslauf.pdf
+          test -s applications/ZZCI_TestCorp/Role_ID9999/MOCK_Bewerbungsanschreiben.pdf
+
   # ---------------------------------------------------------------------------
   # Overleaf Sync (optional — uncomment and configure to enable)
   # ---------------------------------------------------------------------------

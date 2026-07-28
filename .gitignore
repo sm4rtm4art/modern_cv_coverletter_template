@@ -358,5 +358,8 @@ applications/**/build/**
 
 Backup/
 
+# Local-only handoff / audit notes — never commit or publish
+docs/AUDIT_*.md
+docs/AUDIT_*.txt
 
 .DS_Store

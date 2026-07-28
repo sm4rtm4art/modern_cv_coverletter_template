@@ -143,9 +143,10 @@ Compact dates (e.g. `12|25 \textendash Aktuell`) are exposed to ATS via `ActualT
 Templates ship with:
 
 ```latex
-% !TeX program = xelatex
-% !TeX TXS-program:compile = txs:///latexmk
+% !TeX TXS-program:compile = txs:///latexmk/-pdfxe
 ```
+
+Use **`-pdfxe`** (not plain `txs:///latexmk`): TeXStudio’s default Latexmk command often adds `-pdf`, which forces pdflatex and breaks `fontspec`. `.latexmkrc` also remaps `-pdf` → `-pdfxe` as a safety net.
 
 For error highlighting with `aux_dir=build`: Options → Configure TeXstudio → Build → Additional Search Paths → Log File → `./build`.
 
@@ -160,7 +161,7 @@ Overleaf no longer accepts CV/résumé projects under their current policies. Pr
 - **GitHub Actions**: compiles DE/EN templates, uploads PDFs and all-page preview PNGs as artifacts, runs chktex, PII guard, and shellcheck. Refresh `docs/previews/` in a PR when MOCK layouts change (CI does not push to `main`).
 - **Pre-commit**: `pip install pre-commit && pre-commit install` (whitespace, shellcheck, PII).
 - **Privacy**: templates use placeholders; `scripts/pii_guard.sh` plus `.pii_blocklist` (see `.pii_blocklist.example`). Company application folders are gitignored; `_template_*` stay tracked.
-- **New application**: `scripts/new_application.sh "ACME" "Role_ID42" de` (or `"ACME/Role_ID42" de`) copies the template, inits a local git repo, and adds `sendouts/` + `.gitignore`.
+- **New application**: `scripts/new_application.sh "ACME" "Role_ID42" de` (or `"ACME/Role_ID42" de`) copies the template, inits a local git repo, and adds `sendouts/` + `.gitignore`. Classes resolve via `TEXINPUTS` in `.latexmkrc` (any depth under `applications/`).
 
 ## License
 

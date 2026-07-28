@@ -108,42 +108,22 @@
 %===============================================================================
 
 
-% 2. Loading logic (cascade: local → module → shared → error)
+% Loading via kpathsea / TEXINPUTS (set by .latexmkrc → common/cls/{cv,shared_cls}//).
+% Local .cls next to the .tex still wins (cwd is searched first). Depth-independent.
 \newcommand{\cvLoadModule}[1]{%
   \debug{Module load requested: #1.cls}%
-  % Step A: Searched in the local folder of the tex file
   \IfFileExists{#1.cls}{%
-    \cvlog{Loading local module: #1.cls}%
+    \cvlog{Loading module: #1.cls}%
     \input{#1.cls}%
-    \debug{Loaded local module: #1.cls}%
+    \debug{Loaded module: #1.cls}%
   }{%
-    % Step B: search in the cv folder
-    \IfFileExists{\cvModulePath#1.cls}{%
-      \cvlog{Loading cv module: \cvModulePath#1.cls}%
-      \input{\cvModulePath#1.cls}%
-      \debug{Loaded cv module: \cvModulePath#1.cls}%
-    }{%
-      % Step C: search in the cls folder
-      \IfFileExists{\cvSharedPath#1.cls}{%
-        \cvlog{Loading shared module: \cvSharedPath#1.cls}%
-        \input{\cvSharedPath#1.cls}%
-        \debug{Loaded shared module: \cvSharedPath#1.cls}%
-      }{%
-        % Error: not found
-        \cverror{Module '#1' not found}{%
-          File '#1.cls' not found in:\MessageBreak
-          - Local directory\MessageBreak
-          - \cvModulePath\MessageBreak
-          - \cvSharedPath
-        }%
-      }%
+    \cverror{Module '#1' not found}{%
+      File '#1.cls' not found via TEXINPUTS.\MessageBreak
+      Compile with latexmk (template .latexmkrc), or set TEXINPUTS to\MessageBreak
+      <repo>/common/cls/cv//:<repo>/common/cls/shared_cls//
     }%
   }%
 }
-% 1.define path% (ats_cv, defaults_cv...)
-\newcommand{\cvModulePath}{../../common/cls/cv/}
-% Path for shared files (adjustment.cls, ats.cls, ...)
-\newcommand{\cvSharedPath}{../../common/cls/shared_cls/}
 
 %%% ----- Execution -----
 \debug{Starting module load sequence: adjustment -> ats -> defaults_cv -> i18n_cv -> layout_cv -> components_cv}

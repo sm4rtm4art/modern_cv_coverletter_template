@@ -114,43 +114,18 @@
 \coverletterRequirePackage{bookmark}
 
 
-% 1.define path% (ats_coverletter, defaults_coverletter...)
-\newcommand{\coverletterModulePath}{../../common/cls/cover_letter/}
-% Path for generell shared filed (shared_adjustment) -
-\newcommand{\coverletterSharedPath}{../../common/cls/shared_cls/}
-
-\coverLetterLog{Module path: \coverletterModulePath}
-\coverLetterLog{Shared path: \coverletterSharedPath}
-
-
-% 2.Loading logica (Cascade: Lokal -> Module -> Shared -> Error)
+% Loading via kpathsea / TEXINPUTS (set by .latexmkrc →
+% common/cls/{cover_letter,shared_cls}//). Local .cls next to the .tex still wins.
 \newcommand{\coverletterLoadModule}[1]{%
-  % Step A: Searched in the local folder of the tex file
   \IfFileExists{#1.cls}{%
-    \coverLetterLog{Loading local module: #1.cls}%
+    \coverLetterLog{Loading module: #1.cls}%
     \input{#1.cls}%
-    \debug{Loaded local module: #1.cls}%
+    \debug{Loaded module: #1.cls}%
   }{%
-    % Step B: saech in the coverletter folder
-    \IfFileExists{\coverletterModulePath#1.cls}{%
-      \coverLetterLog{Loading coverletter module: \coverletterModulePath#1.cls}%
-      \input{\coverletterModulePath#1.cls}%
-      \debug{Loaded coverletter module: \coverletterModulePath#1.cls}%
-    }{%
-      % Step C: search in the cls folder
-      \IfFileExists{\coverletterSharedPath#1.cls}{%
-        \coverLetterLog{Loading shared module: \coverletterSharedPath#1.cls}%
-        \input{\coverletterSharedPath#1.cls}%
-        \debug{Loaded shared module: \coverletterSharedPath#1.cls}%
-      }{%
-        % Error: not found
-        \coverLetterError{Module '#1' not found}{%
-          File '#1.cls' not found in:\MessageBreak
-          - Local directory\MessageBreak
-          - \coverletterModulePath\MessageBreak
-          - \coverletterSharedPath
-        }%
-      }%
+    \coverLetterError{Module '#1' not found}{%
+      File '#1.cls' not found via TEXINPUTS.\MessageBreak
+      Compile with latexmk (template .latexmkrc), or set TEXINPUTS to\MessageBreak
+      <repo>/common/cls/cover_letter//:<repo>/common/cls/shared_cls//
     }%
   }%
 }

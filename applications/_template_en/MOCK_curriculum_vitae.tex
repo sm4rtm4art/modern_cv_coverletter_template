@@ -1,5 +1,4 @@
-% !TeX program = xelatex
-% !TeX TXS-program:compile = txs:///latexmk
+% !TeX TXS-program:compile = txs:///latexmk/-pdfxe
 %
 
 %===============================================================================
@@ -7,11 +6,12 @@
 % Content only. Layout/fonts handled by common/cls/cv/*.cls.
 %===============================================================================
 
-% documentclass[debug(optional), singlsided/doublesided (2 Page highlightbar left vs. 2 Page highlightbar right ), papersize, global font size]{path to main_cv.cls}
+% documentclass[debug(optional), singlesided/doublesided, papersize, fontsize]
+% Class resolved via TEXINPUTS (.latexmkrc) — works at any depth under applications/.
 \documentclass[debug,
 singlesided,
 paper=a4,
-fontsize=10pt]{../../common/cls/cv/main_cv}
+fontsize=10pt]{main_cv}
 
 %--- options : de/en
 \cvSetLanguage{en}
@@ -90,7 +90,7 @@ fontsize=10pt]{../../common/cls/cv/main_cv}
 	}
 
 	%% Photo options => square | roundedbottom
-	\photo[roundedbottom]{../../images/image}{\dimexpr \headerheight-\marginbottom}
+	\photo[roundedbottom]{image}{\dimexpr \headerheight-\marginbottom}
 
 	\makeheader
 
