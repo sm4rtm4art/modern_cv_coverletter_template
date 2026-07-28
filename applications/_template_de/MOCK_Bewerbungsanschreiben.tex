@@ -1,5 +1,4 @@
-% !TeX program = xelatex
-% !TeX TXS-program:compile = txs:///latexmk
+% !TeX TXS-program:compile = txs:///latexmk/-pdfxe
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %																																  %
@@ -8,7 +7,8 @@
 %																																  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[debug,12pt,a4paper]{../../common/cls/cover_letter/main_cover_letter}
+% Class resolved via TEXINPUTS (.latexmkrc) — works at any depth under applications/.
+\documentclass[debug,12pt,a4paper]{main_cover_letter}
 \geometry{left=1.5cm, top=1cm, right=1.5cm, bottom=1.0cm, footskip=.5cm}
 
 \usepackage[ngerman]{babel}

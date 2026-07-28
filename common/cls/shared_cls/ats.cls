@@ -133,6 +133,8 @@
 % IMPORTANT: Keep on a single line — newlines become leading spaces that
 %            break \IfSubStr matching inside \cvIfPresentTokenTF.
 \providecommand{\cvPresentTokens}{Aktuell,aktuell,present,Present,current,Current}
+% Visual present-word (overridden by i18n_cv via \cvSetLanguage); fallback German.
+\providecommand{\cvPresentWord}{Aktuell}
 
 
 
@@ -207,7 +209,7 @@
       \edef\cvDatePlainTmp{\cvLNorm}%
     }{%
       \cvIfPresentTokenTF{\cvRTrim}{%
-        \edef\cvDateVisTmp{\cvLVis\space\noexpand\textendash\space Aktuell}%
+        \edef\cvDateVisTmp{\cvLVis\space\noexpand\textendash\space\cvPresentWord}%
         \edef\cvDatePlainTmp{\cvLNorm\space-\space\cvTodayMMYYYY}%
       }{%
         \cvDateSideNormalize{\cvRRaw}{\cvRNorm}%
