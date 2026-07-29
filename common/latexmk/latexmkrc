@@ -1,0 +1,55 @@
+# Shared latexmk config for this repository.
+# Loaded via a thin per-application/template stub:
+#   applications/**/.latexmkrc  →  do "<repo>/common/latexmk/latexmkrc"
+#
+# Why a stub per folder?
+#   latexmk only auto-reads .latexmkrc from the document directory (and ~/).
+#   A single repo-root file is NOT picked up when you compile inside
+#   applications/<Company>/<Submission>/. The stub is a dotfile (hidden in
+#   Finder) and should be ignored while writing application content.
+#
+# Auxiliaries → ./build/ ; PDF + synctex.gz stay next to the .tex file.
+# Requires latexmk ≥ 4.70 ($emulate_aux).
+
+use Cwd qw(abs_path);
+use File::Basename qw(dirname);
+
+# TeXStudio's default Latexmk command often includes -pdf, which overrides
+# $pdf_mode = 5 and runs pdflatex (fontspec then aborts). Force XeLaTeX.
+BEGIN {
+  @ARGV = map { ($_ eq '-pdf' || $_ eq '--pdf') ? '-pdfxe' : $_ } @ARGV;
+}
+
+sub find_repo_root {
+  my $dir = abs_path('.');
+  while ($dir ne '/') {
+    return $dir if -d "$dir/common/cls";
+    my $parent = dirname($dir);
+    last if $parent eq $dir;
+    $dir = $parent;
+  }
+  die "latexmk: could not find repo root (common/cls) from " . abs_path('.') . "\n";
+}
+
+my $repo_root = find_repo_root();
+
+# Class / shared modules (recursive // search)
+ensure_path('TEXINPUTS', "$repo_root/common/cls/cv//");
+ensure_path('TEXINPUTS', "$repo_root/common/cls/cover_letter//");
+ensure_path('TEXINPUTS', "$repo_root/common/cls/shared_cls//");
+
+# Photos: modern_cv uses images/; Bewerbungen uses common/assets/images/
+ensure_path('TEXINPUTS', "$repo_root/images//")
+  if -d "$repo_root/images";
+ensure_path('TEXINPUTS', "$repo_root/common/assets/images//")
+  if -d "$repo_root/common/assets/images";
+
+$pdf_mode = 5;                 # xelatex → pdf
+$emulate_aux = 1;
+$aux_dir = 'build';
+# $out_dir left unset → PDF and .synctex.gz remain in the source directory
+
+$xelatex = 'xelatex -synctex=1 -interaction=nonstopmode %O %S';
+$max_repeat = 5;
+
+system('mkdir', '-p', $aux_dir) if $aux_dir;

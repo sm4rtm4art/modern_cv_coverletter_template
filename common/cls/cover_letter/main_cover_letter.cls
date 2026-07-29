@@ -114,18 +114,37 @@
 \coverletterRequirePackage{bookmark}
 
 
-% Loading via kpathsea / TEXINPUTS (set by .latexmkrc →
-% common/cls/{cover_letter,shared_cls}//). Local .cls next to the .tex still wins.
+% Prefer TEXINPUTS / cwd. Fallbacks: ../../../ then ../../ (see main_cv.cls).
 \newcommand{\coverletterLoadModule}[1]{%
   \IfFileExists{#1.cls}{%
     \coverLetterLog{Loading module: #1.cls}%
     \input{#1.cls}%
     \debug{Loaded module: #1.cls}%
   }{%
-    \coverLetterError{Module '#1' not found}{%
-      File '#1.cls' not found via TEXINPUTS.\MessageBreak
-      Compile with latexmk (template .latexmkrc), or set TEXINPUTS to\MessageBreak
-      <repo>/common/cls/cover_letter//:<repo>/common/cls/shared_cls//
+    \IfFileExists{../../../common/cls/cover_letter/#1.cls}{%
+      \coverLetterLog{Loading coverletter module (../../../): #1.cls}%
+      \input{../../../common/cls/cover_letter/#1.cls}%
+    }{%
+      \IfFileExists{../../common/cls/cover_letter/#1.cls}{%
+        \coverLetterLog{Loading coverletter module (../../): #1.cls}%
+        \input{../../common/cls/cover_letter/#1.cls}%
+      }{%
+        \IfFileExists{../../../common/cls/shared_cls/#1.cls}{%
+          \coverLetterLog{Loading shared module (../../../): #1.cls}%
+          \input{../../../common/cls/shared_cls/#1.cls}%
+        }{%
+          \IfFileExists{../../common/cls/shared_cls/#1.cls}{%
+            \coverLetterLog{Loading shared module (../../): #1.cls}%
+            \input{../../common/cls/shared_cls/#1.cls}%
+          }{%
+            \coverLetterError{Module '#1' not found}{%
+              File '#1.cls' not found via TEXINPUTS or relative\MessageBreak
+              ../../ / ../../../ common/cls/{cover_letter,shared_cls}/.\MessageBreak
+              Prefer latexmk (template .latexmkrc stub → common/latexmk/).
+            }%
+          }%
+        }%
+      }%
     }%
   }%
 }

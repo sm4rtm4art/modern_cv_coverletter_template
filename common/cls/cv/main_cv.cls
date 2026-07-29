@@ -108,8 +108,10 @@
 %===============================================================================
 
 
-% Loading via kpathsea / TEXINPUTS (set by .latexmkrc → common/cls/{cv,shared_cls}//).
-% Local .cls next to the .tex still wins (cwd is searched first). Depth-independent.
+% Prefer TEXINPUTS / cwd (depth-independent via .latexmkrc).
+% Fallbacks cover both application depths without latexmk:
+%   applications/<Company>/<Submission>/  →  ../../../common/...
+%   applications/_template_<lang>/        →  ../../common/...
 \newcommand{\cvLoadModule}[1]{%
   \debug{Module load requested: #1.cls}%
   \IfFileExists{#1.cls}{%
@@ -117,10 +119,30 @@
     \input{#1.cls}%
     \debug{Loaded module: #1.cls}%
   }{%
-    \cverror{Module '#1' not found}{%
-      File '#1.cls' not found via TEXINPUTS.\MessageBreak
-      Compile with latexmk (template .latexmkrc), or set TEXINPUTS to\MessageBreak
-      <repo>/common/cls/cv//:<repo>/common/cls/shared_cls//
+    \IfFileExists{../../../common/cls/cv/#1.cls}{%
+      \cvlog{Loading cv module (../../../): #1.cls}%
+      \input{../../../common/cls/cv/#1.cls}%
+    }{%
+      \IfFileExists{../../common/cls/cv/#1.cls}{%
+        \cvlog{Loading cv module (../../): #1.cls}%
+        \input{../../common/cls/cv/#1.cls}%
+      }{%
+        \IfFileExists{../../../common/cls/shared_cls/#1.cls}{%
+          \cvlog{Loading shared module (../../../): #1.cls}%
+          \input{../../../common/cls/shared_cls/#1.cls}%
+        }{%
+          \IfFileExists{../../common/cls/shared_cls/#1.cls}{%
+            \cvlog{Loading shared module (../../): #1.cls}%
+            \input{../../common/cls/shared_cls/#1.cls}%
+          }{%
+            \cverror{Module '#1' not found}{%
+              File '#1.cls' not found via TEXINPUTS or relative\MessageBreak
+              ../../ / ../../../ common/cls/{cv,shared_cls}/.\MessageBreak
+              Prefer latexmk (template .latexmkrc stub → common/latexmk/).
+            }%
+          }%
+        }%
+      }%
     }%
   }%
 }
