@@ -126,11 +126,10 @@
   \cvResetSidebarAtsSummary
 }
 
-% Render two columns: sidebar left, mainbar right.
-% Content-stream trick: mainbar is emitted FIRST in the PDF stream
-% (inside a zero-width overlay positioned on the right), then the sidebar.
-% Text extractors that respect stream order read mainbar before sidebar,
-% preventing the interleaving that spatial-heuristic extractors produce.
+% Optional ATS stream-order helper (unused by default): emit #2 first in a
+% zero-width overlay, then #1. Can nudge extractors that respect content-stream
+% order, but changes box placement enough to shift carefully tuned line breaks
+% (e.g. Über mich / Profile). Kept for experiments; \makebody uses side-by-side.
 \newcommand{\cvRenderColumns}[2]{%  % #1 = sidebar, #2 = mainbar
   \makebox[0pt][l]{%
     \hspace*{\dimexpr\cvSidebarTextWidth+\cvColSep\relax}%
@@ -143,6 +142,7 @@
 % - full-width (\fullbar): emit main content only
 % - singlesided: keep the same column order on every page
 % - doublesided: mirror column order on even pages
+% Side-by-side \hspace placement preserves the pre-ATS-overlay visual layout.
 \newcommand{\makebody}{%
   \ifcvFullWidthBody
     \ifblank{\cvMainbarContent}{%
@@ -160,12 +160,12 @@
     \ifcvTwoSided
       \checkoddpage
       \ifoddpage
-        \cvRenderColumns{\cvEmitSidebar}{\cvMainbarContent}%
+        \cvEmitSidebar\hspace{\cvColSep}\cvMainbarContent%
       \else
-        \cvRenderColumns{\cvMainbarContent}{\cvEmitSidebar}%
+        \cvMainbarContent\hspace{\cvColSep}\cvEmitSidebar%
       \fi
     \else
-      \cvRenderColumns{\cvEmitSidebar}{\cvMainbarContent}%
+      \cvEmitSidebar\hspace{\cvColSep}\cvMainbarContent%
     \fi
   \fi
 }

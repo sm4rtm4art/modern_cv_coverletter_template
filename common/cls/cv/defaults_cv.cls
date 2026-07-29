@@ -52,7 +52,7 @@
 
 % Overview entry layout geometry
 \newlength{\cvMetaWidth}          \setlength{\cvMetaWidth}{28mm}
-\newlength{\cvEduMetaExtra}       \setlength{\cvEduMetaExtra}{6mm}
+\newlength{\cvEduMetaExtra}       \setlength{\cvEduMetaExtra}{8mm}
 \newlength{\cvJobDateWidth}       \setlength{\cvJobDateWidth}{\cvMetaWidth}
 \newlength{\cvEduDateWidth}       \setlength{\cvEduDateWidth}{\dimexpr\cvMetaWidth+\cvEduMetaExtra\relax}
 \newlength{\cvEntrySpacing}       \setlength{\cvEntrySpacing}{0cm}

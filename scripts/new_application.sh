@@ -15,8 +15,8 @@
 #   - blue Finder tag on macOS for active drafts
 #   - preferred Finder icon layout
 #
-# Classes resolve via TEXINPUTS (.latexmkrc walks up to the repo root), so
-# depth under applications/ does not matter.
+# Classes resolve via TEXINPUTS (thin .latexmkrc stub → common/latexmk/latexmkrc)
+# with ../../ and ../../../ relative fallbacks if latexmk is not used.
 #
 # Usage:
 #   scripts/new_application.sh "Company" "Submission" [de|en]
